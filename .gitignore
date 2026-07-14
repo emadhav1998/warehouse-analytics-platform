@@ -1,0 +1,27 @@
+# SQL Server
+*.mdf
+*.ldf
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Power BI
+*.pbix.tmp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+*.suo
+*.user
+
+# dbt
+target/
+dbt_packages/
+logs/
