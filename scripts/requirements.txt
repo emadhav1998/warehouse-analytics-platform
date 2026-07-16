@@ -1,0 +1,6 @@
+# scripts/requirements.txt
+# Dependencies for warehouse data scripts
+# Install: pip install -r scripts/requirements.txt
+
+faker==24.11.0
+pyodbc==5.1.0
