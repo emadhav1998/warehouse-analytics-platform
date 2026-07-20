@@ -1,0 +1,103 @@
+version: 2
+
+sources:
+  - name: raw
+    database: WarehouseAnalyticsDB
+    schema: raw
+    loaded_at_field: created_at
+    freshness:
+      warn_after:  {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+
+    tables:
+
+      - name: warehouses
+        description: "Physical warehouse locations and capacity information"
+        columns:
+          - name: warehouse_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: warehouse_code
+            description: "Business key — short code uniquely identifying the warehouse"
+            tests: [unique, not_null]
+
+      - name: products
+        description: "Product catalog with pricing and physical attributes"
+        columns:
+          - name: product_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: sku
+            description: "Stock Keeping Unit — business-facing product identifier"
+            tests: [unique, not_null]
+
+      - name: employees
+        description: "Warehouse workforce with department and shift assignments"
+        columns:
+          - name: employee_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: employee_code
+            description: "Business key — unique employee identifier"
+            tests: [unique, not_null]
+
+      - name: inventory
+        description: "Daily inventory snapshots by warehouse and product"
+        columns:
+          - name: inventory_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: snapshot_date
+            description: "Date of the inventory count"
+            tests: [not_null]
+
+      - name: shipments
+        description: "Inbound and outbound shipment records"
+        columns:
+          - name: shipment_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: shipment_number
+            description: "Business key — unique shipment reference number"
+            tests: [unique, not_null]
+          - name: shipment_type
+            description: "Direction of the shipment"
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: ['Inbound', 'Outbound']
+          - name: status
+            description: "Current status of the shipment"
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: ['Pending', 'In Transit', 'Delivered', 'Cancelled', 'Returned']
+
+      - name: shipment_items
+        description: "Line-item details for each shipment"
+        columns:
+          - name: shipment_item_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: shipment_id
+            description: "FK to raw.shipments"
+            tests: [not_null]
+          - name: quantity
+            description: "Number of units in this line item"
+            tests: [not_null]
+
+      - name: labor_activities
+        description: "Employee labor activity records with productivity metrics"
+        columns:
+          - name: activity_id
+            description: "Surrogate primary key"
+            tests: [unique, not_null]
+          - name: activity_type
+            description: "Type of warehouse activity performed"
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: ['Picking', 'Packing', 'Receiving', 'Putaway', 'Loading', 'Cycle Count']
+          - name: activity_date
+            description: "Calendar date the activity occurred"
+            tests: [not_null]

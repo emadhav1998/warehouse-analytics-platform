@@ -1,0 +1,31 @@
+warehouse_analytics:
+  target: dev
+  outputs:
+
+    # ── Local development (Windows auth) ────────────────────────────────────
+    dev:
+      type: sqlserver
+      driver: 'ODBC Driver 17 for SQL Server'
+      server: localhost
+      port: 1433
+      database: WarehouseAnalyticsDB
+      schema: staging
+      # Windows-integrated auth — no username/password needed locally
+      windows_login: true
+      trust_cert: true
+      # Optional SQL login override via environment variables
+      user: "{{ env_var('DBT_USER', '') }}"
+      password: "{{ env_var('DBT_PASSWORD', '') }}"
+
+    # ── Production (Azure SQL Database) ─────────────────────────────────────
+    prod:
+      type: sqlserver
+      driver: 'ODBC Driver 17 for SQL Server'
+      server: "{{ env_var('PROD_SQL_SERVER') }}"
+      port: 1433
+      database: WarehouseAnalyticsDB
+      schema: staging
+      user: "{{ env_var('PROD_DBT_USER') }}"
+      password: "{{ env_var('PROD_DBT_PASSWORD') }}"
+      encrypt: true
+      trust_cert: false
