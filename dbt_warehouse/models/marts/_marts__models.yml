@@ -1,0 +1,147 @@
+version: 2
+
+models:
+
+  # ── dim_date ──────────────────────────────────────────────────────────────
+  - name: dim_date
+    description: >
+      Date dimension spanning 2024-01-01 to 2027-12-31. Includes standard
+      calendar attributes (year, quarter, month, week, day) plus a fiscal
+      calendar with July 1 as the fiscal year start.
+    columns:
+      - name: date_key
+        description: "Primary key — the calendar date"
+        tests: [unique, not_null]
+      - name: year
+        tests: [not_null]
+      - name: month_number
+        description: "Calendar month (1–12)"
+        tests: [not_null]
+      - name: quarter_number
+        description: "Calendar quarter (1–4)"
+        tests: [not_null]
+      - name: is_weekend
+        description: "1 if Saturday or Sunday, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: fiscal_year
+        description: "Fiscal year (starts July 1 — e.g. July 2025 → FY2026)"
+        tests: [not_null]
+      - name: fiscal_month
+        description: "Fiscal month (1–12, starting July = 1)"
+        tests: [not_null]
+      - name: fiscal_quarter
+        description: "Fiscal quarter (Q1 = Jul-Sep, Q2 = Oct-Dec, Q3 = Jan-Mar, Q4 = Apr-Jun)"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+
+  # ── dim_warehouse ──────────────────────────────────────────────────────────
+  - name: dim_warehouse
+    description: >
+      Warehouse dimension with location attributes, capacity, and a derived
+      size_category classification. Materialized as a table in the mart schema.
+    columns:
+      - name: warehouse_key
+        description: "Surrogate key generated from warehouse_id"
+        tests: [unique, not_null]
+      - name: warehouse_id
+        description: "Natural key from source system"
+        tests: [unique, not_null]
+      - name: warehouse_code
+        description: "Short business identifier for the warehouse"
+        tests: [unique, not_null]
+      - name: warehouse_name
+        tests: [not_null]
+      - name: warehouse_type
+        description: "Operational classification of the warehouse"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Distribution Center', 'Fulfillment Center', 'Cold Storage',
+                         'Regional Hub', 'Distribution', 'Fulfillment']
+      - name: is_active
+        tests: [not_null]
+      - name: size_category
+        description: "Derived: Large (≥200k sqft) / Medium (≥100k) / Small"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Large', 'Medium', 'Small']
+
+  # ── dim_product ────────────────────────────────────────────────────────────
+  - name: dim_product
+    description: >
+      Product dimension with pricing, physical attributes, and derived
+      price_tier and weight_class classifications.
+    columns:
+      - name: product_key
+        description: "Surrogate key generated from product_id"
+        tests: [unique, not_null]
+      - name: product_id
+        description: "Natural key from source system"
+        tests: [unique, not_null]
+      - name: sku
+        description: "Stock Keeping Unit — unique product business key"
+        tests: [unique, not_null]
+      - name: product_name
+        tests: [not_null]
+      - name: unit_cost
+        tests: [not_null]
+      - name: unit_price
+        tests: [not_null]
+      - name: price_tier
+        description: "Derived: Premium (≥$200) / Standard (≥$50) / Economy"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Premium', 'Standard', 'Economy']
+      - name: weight_class
+        description: "Derived: Heavy (≥50 lbs) / Medium (≥10 lbs) / Light"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Heavy', 'Medium', 'Light']
+
+  # ── dim_employee ───────────────────────────────────────────────────────────
+  - name: dim_employee
+    description: >
+      Employee dimension with department, shift, and derived tenure metrics.
+      tenure_days and tenure_band are calculated at query time using GETDATE().
+    columns:
+      - name: employee_key
+        description: "Surrogate key generated from employee_id"
+        tests: [unique, not_null]
+      - name: employee_id
+        description: "Natural key from source system"
+        tests: [unique, not_null]
+      - name: employee_code
+        description: "Business key — unique employee identifier"
+        tests: [unique, not_null]
+      - name: full_name
+        tests: [not_null]
+      - name: department
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Receiving', 'Picking', 'Packing', 'Shipping',
+                         'Inventory Control', 'Management']
+      - name: shift
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Day', 'Swing', 'Night']
+      - name: is_active
+        tests: [not_null]
+      - name: tenure_days
+        description: "Derived: days between hire_date and GETDATE()"
+      - name: tenure_band
+        description: "Derived: Senior / Experienced / Intermediate / Junior based on years at company"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Senior (5+ yrs)', 'Experienced (2-5 yrs)',
+                         'Intermediate (1-2 yrs)', 'Junior (< 1 yr)']
