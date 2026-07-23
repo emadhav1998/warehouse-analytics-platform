@@ -145,3 +145,137 @@ models:
               arguments:
                 values: ['Senior (5+ yrs)', 'Experienced (2-5 yrs)',
                          'Intermediate (1-2 yrs)', 'Junior (< 1 yr)']
+
+  # ── fact_inventory ─────────────────────────────────────────────────────────
+  - name: fact_inventory
+    description: >
+      Daily inventory snapshot fact table. One row per warehouse + product +
+      snapshot_date. Joined to dim_warehouse and dim_product via surrogate keys.
+    columns:
+      - name: inventory_fact_key
+        description: "Surrogate key: MD5 of snapshot_date || warehouse_id || product_id"
+        tests: [unique, not_null]
+      - name: warehouse_key
+        description: "FK to dim_warehouse"
+        tests: [not_null]
+      - name: product_key
+        description: "FK to dim_product"
+        tests: [not_null]
+      - name: date_key
+        description: "FK to dim_date (snapshot_date)"
+        tests: [not_null]
+      - name: quantity_on_hand
+        description: "Total units physically present in the warehouse"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: quantity_available
+        description: "Units available for picking (on_hand minus reserved)"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: stock_status
+        description: "Derived status: Out of Stock / Fully Reserved / Low Stock / In Stock"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Out of Stock', 'Fully Reserved', 'Low Stock', 'In Stock']
+      - name: needs_reorder
+        description: "1 if quantity_available ≤ reorder_point, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: expiring_within_30_days
+        description: "1 if expiry_date is within 30 days of snapshot_date, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+
+  # ── fact_shipment ──────────────────────────────────────────────────────────
+  - name: fact_shipment
+    description: >
+      Shipment fact table. One row per shipment. Includes delivery performance,
+      transit-time measures, and line-item aggregates from stg_shipment_items.
+    columns:
+      - name: shipment_fact_key
+        description: "Surrogate key: MD5 of shipment_id"
+        tests: [unique, not_null]
+      - name: warehouse_key
+        description: "FK to dim_warehouse"
+        tests:
+          - relationships:
+              to: ref('dim_warehouse')
+              field: warehouse_key
+      - name: date_key
+        description: "FK to dim_date (ship_date)"
+        tests: [not_null]
+      - name: shipment_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Inbound', 'Outbound']
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Pending', 'In Transit', 'Delivered', 'Cancelled', 'Returned']
+      - name: delivery_performance
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['On Time', 'Late', 'Cancelled', 'In Progress']
+      - name: is_late
+        description: "1 if actual_transit_days > expected_transit_days, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: shipping_cost
+        description: "Total shipping cost for this shipment"
+
+  # ── fact_labor ─────────────────────────────────────────────────────────────
+  - name: fact_labor
+    description: >
+      Labor productivity fact table. One row per employee + activity_type +
+      activity_date. Joined to dim_warehouse and dim_employee via surrogate keys.
+    columns:
+      - name: labor_fact_key
+        description: "Surrogate key: MD5 of activity_date || employee_id || activity_type"
+        tests: [unique, not_null]
+      - name: warehouse_key
+        description: "FK to dim_warehouse"
+        tests: [not_null]
+      - name: employee_key
+        description: "FK to dim_employee"
+        tests: [not_null]
+      - name: date_key
+        description: "FK to dim_date (activity_date)"
+        tests: [not_null]
+      - name: activity_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Picking', 'Packing', 'Receiving', 'Putaway', 'Loading', 'Cycle Count']
+      - name: total_hours
+        description: "Total hours worked in this grouping"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 24
+      - name: avg_units_per_hour
+        description: "Productivity: total_units / total_hours"
+      - name: error_rate_pct
+        description: "Quality: (total_errors / total_units) × 100"
+      - name: labor_cost
+        description: "Cost: total_hours × hourly_rate"
+      - name: productivity_tier
+        description: "Derived: High (≥100 UPH) / Medium (≥50) / Low"
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['High', 'Medium', 'Low']
