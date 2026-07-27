@@ -1,0 +1,6 @@
+warehouse_code,region,timezone,manager_name
+WH-001,Northeast,EST,John Mitchell
+WH-002,Southeast,EST,Sarah Johnson
+WH-003,Midwest,CST,Mike Davis
+WH-004,Southwest,MST,Lisa Rodriguez
+WH-005,West,PST,James Wilson
