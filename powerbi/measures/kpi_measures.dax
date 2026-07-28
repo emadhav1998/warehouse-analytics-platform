@@ -1,0 +1,104 @@
+// =============================================================================
+// File    : kpi_measures.dax
+// Purpose : Master KPI measures table for the Warehouse Analytics report.
+//           All measures belong to the hidden _Measures table.
+//
+// Naming convention : "KPI Label" (no unit suffix in measure name)
+// Format strings    : defined per measure via Format pane
+// =============================================================================
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVENTORY MEASURES  (see inventory_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+Total Inventory Value (Cost) =
+SUMX(
+    fact_inventory,
+    fact_inventory[inventory_value_at_cost]
+)
+// Format: $#,##0.00
+
+Stock Out Rate % =
+DIVIDE(
+    COUNTROWS(FILTER(fact_inventory, fact_inventory[stock_status] = "Out of Stock")),
+    COUNTROWS(fact_inventory),
+    0
+) * 100
+// Format: 0.00%
+
+Items Below Reorder Point =
+COUNTROWS(FILTER(fact_inventory, fact_inventory[needs_reorder] = 1))
+// Format: #,##0
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHIPMENT MEASURES  (see shipment_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+Total Shipments =
+COUNTROWS(fact_shipment)
+// Format: #,##0
+
+On-Time Delivery Rate % =
+DIVIDE(
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[delivery_performance] = "On Time")),
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Delivered")),
+    0
+) * 100
+// Format: 0.00%
+
+Total Shipping Cost =
+SUM(fact_shipment[shipping_cost])
+// Format: $#,##0.00
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LABOR MEASURES  (see labor_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+Total Labor Hours =
+SUM(fact_labor[total_hours])
+// Format: #,##0.0
+
+Total Labor Cost =
+SUM(fact_labor[labor_cost])
+// Format: $#,##0.00
+
+Average Units Per Hour =
+DIVIDE(
+    SUM(fact_labor[total_units]),
+    SUM(fact_labor[total_hours]),
+    0
+)
+// Format: #,##0.0
+
+Error Rate % =
+DIVIDE(
+    SUM(fact_labor[total_errors]),
+    SUM(fact_labor[total_units]),
+    0
+) * 100
+// Format: 0.00%
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STAR SCHEMA RELATIONSHIP MAP (reference — not runnable DAX)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// dim_date.date_key      (1) → (*) fact_inventory.date_key
+// dim_date.date_key      (1) → (*) fact_shipment.date_key
+// dim_date.date_key      (1) → (*) fact_labor.date_key
+//
+// dim_warehouse.warehouse_key (1) → (*) fact_inventory.warehouse_key
+// dim_warehouse.warehouse_key (1) → (*) fact_shipment.warehouse_key
+// dim_warehouse.warehouse_key (1) → (*) fact_labor.warehouse_key
+//
+// dim_product.product_key     (1) → (*) fact_inventory.product_key
+// dim_employee.employee_key   (1) → (*) fact_labor.employee_key
+//
+// All relationships: single-direction, cross-filter = Single
+//
+// Date Hierarchy (on dim_date):
+//   Year → Quarter Name → Month Name → Date Key
+//   Sort: month_name BY month_number, quarter_name BY quarter_number
