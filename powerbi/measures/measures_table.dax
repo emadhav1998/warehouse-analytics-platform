@@ -1,0 +1,15 @@
+// =============================================================================
+// File    : measures_table.dax
+// Purpose : Calculated table used as the home table for report measures.
+// Setup   : In Power BI Desktop, select Modeling > New table and enter the
+//           expression below. Hide the placeholder column after creation.
+// =============================================================================
+
+_Measures =
+DATATABLE(
+    "Measure Placeholder", STRING,
+    {
+        { "Measures" }
+    }
+)
+

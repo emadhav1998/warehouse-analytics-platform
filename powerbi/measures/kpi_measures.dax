@@ -3,7 +3,7 @@
 // Purpose : Master KPI measures table for the Warehouse Analytics report.
 //           All measures belong to the hidden _Measures table.
 //
-// Naming convention : "KPI Label" (no unit suffix in measure name)
+// Naming convention : "KPI Name | Unit"
 // Format strings    : defined per measure via Format pane
 // =============================================================================
 
@@ -12,24 +12,8 @@
 // INVENTORY MEASURES  (see inventory_measures.dax for full set)
 // ─────────────────────────────────────────────────────────────────────────────
 
-Total Inventory Value (Cost) =
-SUMX(
-    fact_inventory,
-    fact_inventory[inventory_value_at_cost]
-)
-// Format: $#,##0.00
-
-Stock Out Rate % =
-DIVIDE(
-    COUNTROWS(FILTER(fact_inventory, fact_inventory[stock_status] = "Out of Stock")),
-    COUNTROWS(fact_inventory),
-    0
-) * 100
-// Format: 0.00%
-
-Items Below Reorder Point =
-COUNTROWS(FILTER(fact_inventory, fact_inventory[needs_reorder] = 1))
-// Format: #,##0
+// Inventory measures are defined in inventory_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
 
 
 // ─────────────────────────────────────────────────────────────────────────────

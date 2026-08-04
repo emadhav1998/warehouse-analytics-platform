@@ -1,0 +1,109 @@
+// =============================================================================
+// File    : inventory_measures.dax
+// Purpose : Inventory KPI measures for the Warehouse Analytics report.
+// Home table: _Measures
+// Naming convention: KPI Name | Unit
+// =============================================================================
+
+// === INVENTORY KPIs ===
+
+Total Inventory Value (Cost) | USD =
+SUMX(
+    fact_inventory,
+    fact_inventory[inventory_value_at_cost]
+)
+// Format: $#,##0.00
+
+Total Inventory Value (Retail) | USD =
+SUMX(
+    fact_inventory,
+    fact_inventory[inventory_value_at_retail]
+)
+// Format: $#,##0.00
+
+Total Quantity On Hand | Units =
+SUM(fact_inventory[quantity_on_hand])
+// Format: #,##0
+
+Total Quantity Available | Units =
+SUM(fact_inventory[quantity_available])
+// Format: #,##0
+
+Inventory Utilization | % =
+DIVIDE(
+    [Total Quantity On Hand | Units] - [Total Quantity Available | Units],
+    [Total Quantity On Hand | Units],
+    0
+) * 100
+// Format: 0.00
+
+Stock Out Rate | % =
+DIVIDE(
+    COUNTROWS(
+        FILTER(
+            fact_inventory,
+            fact_inventory[stock_status] = "Out of Stock"
+        )
+    ),
+    COUNTROWS(fact_inventory),
+    0
+) * 100
+// Format: 0.00
+
+Items Below Reorder Point | Items =
+COUNTROWS(
+    FILTER(
+        fact_inventory,
+        fact_inventory[needs_reorder] = 1
+    )
+)
+// Format: #,##0
+
+Inventory Accuracy | % =
+VAR _TotalItems =
+    COUNTROWS(fact_inventory)
+VAR _AccurateItems =
+    COUNTROWS(
+        FILTER(
+            fact_inventory,
+            fact_inventory[quantity_on_hand]
+                = fact_inventory[quantity_reserved]
+                    + fact_inventory[quantity_available]
+        )
+    )
+RETURN
+    DIVIDE(_AccurateItems, _TotalItems, 0) * 100
+// Format: 0.00
+
+Days of Supply | Days =
+VAR _AvgDailyUsage =
+    AVERAGEX(
+        VALUES(fact_inventory[date_key]),
+        CALCULATE(SUM(fact_inventory[quantity_on_hand]))
+    )
+RETURN
+    DIVIDE([Total Quantity On Hand | Units], _AvgDailyUsage, 0)
+// Format: #,##0.0
+
+Expiring Items (30 Days) | Items =
+COUNTROWS(
+    FILTER(
+        fact_inventory,
+        fact_inventory[expiring_within_30_days] = 1
+    )
+)
+// Format: #,##0
+
+// === PREVIOUS PERIOD COMPARISONS ===
+
+Inventory Value MoM Change | % =
+VAR _CurrentValue =
+    [Total Inventory Value (Cost) | USD]
+VAR _PriorValue =
+    CALCULATE(
+        [Total Inventory Value (Cost) | USD],
+        DATEADD(dim_date[date_key], -1, MONTH)
+    )
+RETURN
+    DIVIDE(_CurrentValue - _PriorValue, _PriorValue, 0) * 100
+// Format: 0.00
