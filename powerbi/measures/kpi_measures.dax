@@ -20,50 +20,16 @@
 // SHIPMENT MEASURES  (see shipment_measures.dax for full set)
 // ─────────────────────────────────────────────────────────────────────────────
 
-Total Shipments =
-COUNTROWS(fact_shipment)
-// Format: #,##0
-
-On-Time Delivery Rate % =
-DIVIDE(
-    COUNTROWS(FILTER(fact_shipment, fact_shipment[delivery_performance] = "On Time")),
-    COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Delivered")),
-    0
-) * 100
-// Format: 0.00%
-
-Total Shipping Cost =
-SUM(fact_shipment[shipping_cost])
-// Format: $#,##0.00
+// Shipment measures are defined in shipment_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LABOR MEASURES  (see labor_measures.dax for full set)
 // ─────────────────────────────────────────────────────────────────────────────
 
-Total Labor Hours =
-SUM(fact_labor[total_hours])
-// Format: #,##0.0
-
-Total Labor Cost =
-SUM(fact_labor[labor_cost])
-// Format: $#,##0.00
-
-Average Units Per Hour =
-DIVIDE(
-    SUM(fact_labor[total_units]),
-    SUM(fact_labor[total_hours]),
-    0
-)
-// Format: #,##0.0
-
-Error Rate % =
-DIVIDE(
-    SUM(fact_labor[total_errors]),
-    SUM(fact_labor[total_units]),
-    0
-) * 100
-// Format: 0.00%
+// Labor measures are defined in labor_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
 
 
 // ─────────────────────────────────────────────────────────────────────────────

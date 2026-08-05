@@ -1,0 +1,101 @@
+// =============================================================================
+// File    : labor_measures.dax
+// Purpose : Labor productivity and time-intelligence KPI measures.
+// Home table: _Measures
+// Naming convention: KPI Name | Unit
+// =============================================================================
+
+// === LABOR KPIs ===
+
+Total Labor Hours | Hours =
+SUM(fact_labor[total_hours])
+// Format: #,##0.0
+
+Total Labor Cost | USD =
+SUM(fact_labor[labor_cost])
+// Format: $#,##0.00
+
+Total Units Processed | Units =
+SUM(fact_labor[total_units])
+// Format: #,##0
+
+Average Units Per Hour | Units/Hour =
+DIVIDE([Total Units Processed | Units], [Total Labor Hours | Hours], 0)
+// Format: #,##0.0
+
+Labor Efficiency Index | % =
+VAR _AvgProductivity =
+    AVERAGE(fact_labor[avg_units_per_hour])
+// Industry benchmark in units per hour.
+VAR _BenchmarkProductivity = 75
+RETURN
+    DIVIDE(_AvgProductivity, _BenchmarkProductivity, 0) * 100
+// Format: 0.00
+
+Error Rate | % =
+DIVIDE(
+    SUM(fact_labor[total_errors]),
+    [Total Units Processed | Units],
+    0
+) * 100
+// Format: 0.00
+
+Cost Per Unit Processed | USD/Unit =
+DIVIDE([Total Labor Cost | USD], [Total Units Processed | Units], 0)
+// Format: $#,##0.00
+
+Headcount (Active) | Employees =
+DISTINCTCOUNT(fact_labor[employee_id])
+// Format: #,##0
+
+Average Hours Per Employee | Hours/Employee =
+DIVIDE([Total Labor Hours | Hours], [Headcount (Active) | Employees], 0)
+// Format: #,##0.0
+
+Overtime Indicator | Employee-Days =
+COUNTROWS(
+    FILTER(
+        SUMMARIZE(
+            fact_labor,
+            fact_labor[employee_id],
+            fact_labor[date_key],
+            "DailyHours", SUM(fact_labor[total_hours])
+        ),
+        [DailyHours] > 8
+    )
+)
+// Format: #,##0
+
+High Performers Count | Labor Records =
+COUNTROWS(FILTER(fact_labor, fact_labor[productivity_tier] = "High"))
+// Format: #,##0
+
+// === TIME INTELLIGENCE ===
+
+Labor Cost MTD | USD =
+CALCULATE(
+    [Total Labor Cost | USD],
+    DATESMTD(dim_date[date_key])
+)
+// Format: $#,##0.00
+
+Labor Cost QTD | USD =
+CALCULATE(
+    [Total Labor Cost | USD],
+    DATESQTD(dim_date[date_key])
+)
+// Format: $#,##0.00
+
+Labor Cost YTD | USD =
+CALCULATE(
+    [Total Labor Cost | USD],
+    DATESYTD(dim_date[date_key])
+)
+// Format: $#,##0.00
+
+Units Processed YTD | Units =
+CALCULATE(
+    [Total Units Processed | Units],
+    DATESYTD(dim_date[date_key])
+)
+// Format: #,##0
