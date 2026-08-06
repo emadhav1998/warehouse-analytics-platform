@@ -1,0 +1,211 @@
+{
+  "schemaVersion": "1.0",
+  "reportName": "Warehouse Analytics",
+  "canvas": { "width": 1440, "height": 900, "display": "16:10" },
+  "theme": "../theme/warehouse_analytics_theme.json",
+  "globalSettings": {
+    "dateTable": "dim_date",
+    "dateColumn": "dim_date[date_key]",
+    "measureHomeTable": "_Measures",
+    "syncSlicers": ["Date Range", "Warehouse", "Category"],
+    "colors": {
+      "navy": "#1A365D",
+      "blue": "#2B6CB0",
+      "green": "#38A169",
+      "amber": "#D69E2E",
+      "red": "#E53E3E",
+      "gray": "#718096",
+      "canvas": "#F7FAFC",
+      "surface": "#FFFFFF"
+    }
+  },
+  "pages": [
+    {
+      "name": "Executive Overview",
+      "displayName": "Executive Overview",
+      "pageType": "standard",
+      "visuals": [
+        { "id": "title", "type": "textBox", "title": "WAREHOUSE ANALYTICS", "position": [24, 18, 330, 44] },
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "search": true, "position": [952, 14, 220, 54] },
+        { "id": "category", "type": "slicer", "title": "Category", "field": "dim_product[category]", "style": "dropdown", "search": true, "position": [1184, 14, 232, 54] },
+        {
+          "id": "inventory_value_card", "type": "card", "title": "Total Inventory Value",
+          "callout": "_Measures[Total Inventory Value (Cost) | USD]", "referenceLabel": "_Measures[Inventory Value MoM Change | %]",
+          "position": [24, 92, 264, 138], "conditionalDirection": "higherIsBetter", "tooltipPage": "KPI Tooltip"
+        },
+        {
+          "id": "otd_card", "type": "card", "title": "OTD Rate",
+          "callout": "_Measures[On-Time Delivery Rate | %]", "referenceLabel": "_Measures[On-Time Delivery Rate MoM Change | pp]",
+          "position": [300, 92, 264, 138], "conditionalDirection": "higherIsBetter", "tooltipPage": "KPI Tooltip"
+        },
+        {
+          "id": "uph_card", "type": "card", "title": "Units per Hour",
+          "callout": "_Measures[Average Units Per Hour | Units/Hour]", "referenceLabel": "_Measures[Units Per Hour MoM Change | %]",
+          "position": [576, 92, 264, 138], "conditionalDirection": "higherIsBetter", "tooltipPage": "KPI Tooltip"
+        },
+        {
+          "id": "labor_cost_card", "type": "card", "title": "Total Labor Cost",
+          "callout": "_Measures[Total Labor Cost | USD]", "referenceLabel": "_Measures[Labor Cost MoM Change | %]",
+          "position": [852, 92, 264, 138], "conditionalDirection": "lowerIsBetter", "tooltipPage": "KPI Tooltip"
+        },
+        {
+          "id": "stockout_card", "type": "card", "title": "Stock Out Rate",
+          "callout": "_Measures[Stock Out Rate | %]", "referenceLabel": "_Measures[Stock Out Rate MoM Change | pp]",
+          "position": [1128, 92, 288, 138], "conditionalDirection": "lowerIsBetter", "tooltipPage": "KPI Tooltip"
+        },
+        {
+          "id": "inventory_trend", "type": "lineChart", "title": "Inventory Value Trend",
+          "xAxis": "dim_date[year_month]", "yAxis": ["_Measures[Total Inventory Value (Cost) | USD]"],
+          "sort": { "field": "dim_date[date_key]", "direction": "ascending" }, "position": [24, 250, 900, 286], "drillthroughTarget": "Inventory Analysis"
+        },
+        {
+          "id": "monthly_shipments", "type": "stackedColumnChart", "title": "Monthly Shipments",
+          "xAxis": "dim_date[year_month]", "yAxis": ["_Measures[Total Shipments | Shipments]"], "legend": "fact_shipment[shipment_type]",
+          "sort": { "field": "dim_date[date_key]", "direction": "ascending" }, "position": [24, 552, 900, 324], "drillthroughTarget": "Shipment Performance"
+        },
+        {
+          "id": "warehouse_comparison", "type": "barChart", "title": "Inventory Value by Warehouse",
+          "yAxis": "dim_warehouse[warehouse_name]", "xAxis": ["_Measures[Total Inventory Value (Cost) | USD]"],
+          "sort": { "field": "_Measures[Total Inventory Value (Cost) | USD]", "direction": "descending" },
+          "dataLabels": true, "position": [940, 250, 476, 626]
+        }
+      ],
+      "interactions": { "slicersFilterAll": true, "visualSelectionCrossFilters": true }
+    },
+    {
+      "name": "Inventory Analysis",
+      "displayName": "Inventory Analysis",
+      "pageType": "standard",
+      "drillthroughFields": ["dim_warehouse[warehouse_name]", "dim_product[category]"],
+      "keepAllFilters": true,
+      "visuals": [
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "position": [952, 14, 220, 54] },
+        { "id": "category", "type": "slicer", "title": "Category", "field": "dim_product[category]", "style": "dropdown", "position": [1184, 14, 232, 54] },
+        {
+          "id": "stock_heatmap", "type": "matrix", "title": "Stock Level Heatmap",
+          "rows": ["dim_warehouse[warehouse_name]"], "columns": ["dim_product[category]"], "values": ["_Measures[Total Quantity On Hand | Units]"],
+          "conditionalFormatting": { "type": "colorScale", "minimum": "#FEE2E2", "center": "#FEF3C7", "maximum": "#DCFCE7" },
+          "position": [24, 92, 760, 300], "tooltipPage": "Inventory Tooltip"
+        },
+        {
+          "id": "stock_status", "type": "donutChart", "title": "Stock Status",
+          "legend": "fact_inventory[stock_status]", "values": ["_Measures[Inventory Records | Records]"],
+          "dataColorsByCategory": { "In Stock": "#38A169", "Low Stock": "#D69E2E", "Out of Stock": "#E53E3E" },
+          "position": [800, 92, 300, 300], "tooltipPage": "Inventory Tooltip"
+        },
+        {
+          "id": "days_supply", "type": "gauge", "title": "Days of Supply",
+          "value": "_Measures[Days of Supply | Days]", "minimum": 0, "target": "_Measures[Days of Supply Target | Days]", "maximum": 60,
+          "position": [1116, 92, 300, 300]
+        },
+        {
+          "id": "reorder_alerts", "type": "table", "title": "Reorder Alerts",
+          "fields": ["dim_warehouse[warehouse_name]", "dim_product[sku]", "dim_product[product_name]", "dim_product[category]", "fact_inventory[quantity_on_hand]", "fact_inventory[reorder_point]", "fact_inventory[stock_status]"],
+          "visualFilter": { "field": "fact_inventory[needs_reorder]", "operator": "equals", "value": 1 },
+          "conditionalFormatting": { "field": "fact_inventory[stock_status]", "formatBy": "fieldValue", "basedOn": "_Measures[Stock Status Color | Hex]", "applyTo": "background" },
+          "position": [24, 410, 900, 466], "tooltipPage": "Inventory Tooltip"
+        },
+        {
+          "id": "inventory_treemap", "type": "treemap", "title": "Inventory Value by Category",
+          "group": "dim_product[category]", "values": ["_Measures[Total Inventory Value (Cost) | USD]"],
+          "position": [940, 410, 476, 466], "tooltipPage": "Inventory Tooltip"
+        }
+      ],
+      "interactions": { "slicersFilterAll": true, "visualSelectionCrossFilters": true }
+    },
+    {
+      "name": "Shipment Performance",
+      "displayName": "Shipment Performance",
+      "pageType": "standard",
+      "drillthroughFields": ["dim_warehouse[warehouse_name]", "fact_shipment[carrier]"],
+      "keepAllFilters": true,
+      "visuals": [
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "position": [952, 14, 220, 54] },
+        {
+          "id": "otd_trend", "type": "lineChart", "title": "On-Time Delivery Trend",
+          "xAxisFieldParameter": "Shipment Trend Granularity", "xAxisOptions": ["dim_date[date_key]", "dim_date[week_of_year]", "dim_date[year_month]"],
+          "yAxis": ["_Measures[On-Time Delivery Rate | %]"], "position": [24, 92, 900, 300], "tooltipPage": "Shipment Tooltip"
+        },
+        {
+          "id": "status_funnel", "type": "funnel", "title": "Shipment Status",
+          "category": "fact_shipment[status]", "values": ["_Measures[Total Shipments | Shipments]"],
+          "position": [940, 92, 476, 300], "tooltipPage": "Shipment Tooltip"
+        },
+        {
+          "id": "carrier_matrix", "type": "matrix", "title": "Carrier Performance",
+          "rows": ["fact_shipment[carrier]"],
+          "values": ["_Measures[On-Time Delivery Rate | %]", "_Measures[Total Shipping Cost | USD]", "_Measures[Cost Per Shipment | USD/Shipment]", "_Measures[Total Shipments | Shipments]"],
+          "conditionalFormatting": [
+            { "field": "_Measures[On-Time Delivery Rate | %]", "type": "colorScale", "minimum": "#FEE2E2", "maximum": "#DCFCE7" },
+            { "field": "_Measures[Cost Per Shipment | USD/Shipment]", "type": "dataBars", "color": "#2B6CB0" }
+          ],
+          "position": [24, 410, 650, 466], "tooltipPage": "Shipment Tooltip"
+        },
+        {
+          "id": "late_shipments", "type": "table", "title": "Late Shipments",
+          "fields": ["fact_shipment[shipment_number]", "dim_warehouse[warehouse_name]", "fact_shipment[carrier]", "fact_shipment[ship_date]", "fact_shipment[expected_delivery]", "fact_shipment[actual_delivery]", "fact_shipment[actual_transit_days]", "fact_shipment[shipping_cost]"],
+          "visualFilter": { "field": "fact_shipment[is_late]", "operator": "equals", "value": 1 },
+          "conditionalFormatting": { "field": "fact_shipment[actual_transit_days]", "type": "rules", "rules": [{ "operator": "greaterThan", "value": 0, "color": "#FEE2E2" }] },
+          "drillthroughTarget": "Late Shipment Detail", "position": [690, 410, 726, 466], "tooltipPage": "Shipment Tooltip"
+        }
+      ],
+      "unavailableVisuals": [
+        { "type": "map", "reason": "fact_shipment has no destination geography field; raw dest_address is not exposed by the mart model." }
+      ],
+      "interactions": { "slicersFilterAll": true, "visualSelectionCrossFilters": true }
+    },
+    {
+      "name": "Late Shipment Detail",
+      "displayName": "Late Shipment Detail",
+      "pageType": "drillthrough",
+      "hidden": true,
+      "drillthroughFields": ["fact_shipment[shipment_number]"],
+      "keepAllFilters": true,
+      "visuals": [
+        { "id": "back", "type": "button", "action": "back", "position": [24, 18, 96, 44] },
+        { "id": "shipment", "type": "card", "title": "Shipment", "callout": "fact_shipment[shipment_number]", "position": [24, 92, 260, 120] },
+        { "id": "carrier", "type": "card", "title": "Carrier", "callout": "fact_shipment[carrier]", "position": [300, 92, 260, 120] },
+        { "id": "transit", "type": "card", "title": "Actual Transit Days", "callout": "_Measures[Average Transit Days | Days]", "position": [576, 92, 260, 120] },
+        { "id": "cost", "type": "card", "title": "Shipping Cost", "callout": "_Measures[Total Shipping Cost | USD]", "position": [852, 92, 260, 120] },
+        {
+          "id": "detail", "type": "table", "title": "Shipment Detail",
+          "fields": ["fact_shipment[shipment_number]", "fact_shipment[order_number]", "fact_shipment[shipment_type]", "fact_shipment[status]", "fact_shipment[delivery_performance]", "fact_shipment[ship_date]", "fact_shipment[expected_delivery]", "fact_shipment[actual_delivery]", "fact_shipment[expected_transit_days]", "fact_shipment[actual_transit_days]", "fact_shipment[total_items]", "fact_shipment[total_quantity]", "fact_shipment[shipping_cost]"],
+          "conditionalFormatting": { "field": "fact_shipment[delivery_performance]", "formatBy": "fieldValue", "basedOn": "_Measures[Delivery Performance Color | Hex]", "applyTo": "background" },
+          "position": [24, 236, 1392, 640]
+        }
+      ]
+    }
+  ],
+  "tooltipPages": [
+    {
+      "name": "KPI Tooltip", "size": [320, 240],
+      "fields": ["dim_date[year_month]", "dim_warehouse[warehouse_name]"],
+      "content": ["Current filter context", "Current KPI value", "Previous-month change"]
+    },
+    {
+      "name": "Inventory Tooltip", "size": [320, 240],
+      "fields": ["dim_warehouse[warehouse_name]", "dim_product[category]"],
+      "measures": ["_Measures[Total Quantity On Hand | Units]", "_Measures[Total Quantity Available | Units]", "_Measures[Total Inventory Value (Cost) | USD]", "_Measures[Items Below Reorder Point | Items]"]
+    },
+    {
+      "name": "Shipment Tooltip", "size": [320, 240],
+      "fields": ["fact_shipment[carrier]", "fact_shipment[status]"],
+      "measures": ["_Measures[Total Shipments | Shipments]", "_Measures[On-Time Delivery Rate | %]", "_Measures[Average Transit Days | Days]", "_Measures[Total Shipping Cost | USD]"]
+    }
+  ],
+  "fieldParameters": [
+    {
+      "name": "Shipment Trend Granularity",
+      "default": "Month",
+      "values": [
+        { "label": "Daily", "field": "dim_date[date_key]", "order": 0 },
+        { "label": "Weekly", "field": "dim_date[week_of_year]", "order": 1 },
+        { "label": "Monthly", "field": "dim_date[year_month]", "order": 2 }
+      ]
+    }
+  ]
+}
+
