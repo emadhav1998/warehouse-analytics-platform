@@ -177,6 +177,86 @@
           "position": [24, 236, 1392, 640]
         }
       ]
+    },
+    {
+      "name": "Labor Productivity",
+      "displayName": "Labor Productivity",
+      "pageType": "standard",
+      "visuals": [
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "position": [952, 14, 220, 54] },
+        { "id": "department", "type": "slicer", "title": "Department", "field": "dim_employee[department]", "style": "dropdown", "position": [1184, 14, 232, 54] },
+        {
+          "id": "employee_scatter", "type": "scatterChart", "title": "Employee Productivity: UPH vs Error Rate",
+          "xAxis": "_Measures[Average Units Per Hour | Units/Hour]", "yAxis": "_Measures[Error Rate | %]",
+          "details": "dim_employee[full_name]", "size": "_Measures[Total Labor Hours | Hours]", "legend": "fact_labor[productivity_tier]",
+          "constantLines": [{ "axis": "x", "value": 75, "label": "UPH target" }, { "axis": "y", "value": 1, "label": "Error-rate target" }],
+          "position": [24, 92, 680, 330], "tooltipPage": "Labor Tooltip"
+        },
+        {
+          "id": "department_comparison", "type": "barChart", "title": "Department Productivity",
+          "yAxis": "dim_employee[department]", "xAxis": ["_Measures[Average Units Per Hour | Units/Hour]"],
+          "tooltips": ["_Measures[Error Rate | %]", "_Measures[Total Units Processed | Units]", "_Measures[Total Labor Cost | USD]"],
+          "sort": { "field": "_Measures[Average Units Per Hour | Units/Hour]", "direction": "descending" },
+          "position": [720, 92, 336, 330], "tooltipPage": "Labor Tooltip"
+        },
+        {
+          "id": "shift_analysis", "type": "clusteredColumnChart", "title": "Shift Analysis",
+          "xAxis": "dim_employee[shift]", "yAxis": ["_Measures[Average Units Per Hour | Units/Hour]", "_Measures[Error Rate | %]"],
+          "secondaryAxis": true, "position": [1072, 92, 344, 330], "tooltipPage": "Labor Tooltip"
+        },
+        { "id": "top10_button", "type": "button", "text": "Top 10", "action": "bookmark", "bookmark": "Labor - Top 10", "position": [24, 438, 108, 40] },
+        { "id": "bottom10_button", "type": "button", "text": "Bottom 10", "action": "bookmark", "bookmark": "Labor - Bottom 10", "position": [140, 438, 108, 40] },
+        {
+          "id": "top10_performers", "type": "table", "title": "Top 10 Performers", "bookmarkGroup": "Labor Performer View",
+          "fields": ["dim_employee[full_name]", "dim_employee[department]", "dim_employee[shift]", "_Measures[Average Units Per Hour | Units/Hour]", "_Measures[Error Rate | %]", "_Measures[Total Units Processed | Units]", "_Measures[Employee Performance Rank | Rank]"],
+          "visualFilter": { "field": "_Measures[Employee Performance Rank | Rank]", "operator": "lessThanOrEqual", "value": 10 },
+          "sort": { "field": "_Measures[Employee Performance Rank | Rank]", "direction": "ascending" },
+          "position": [24, 490, 680, 386], "tooltipPage": "Labor Tooltip"
+        },
+        {
+          "id": "bottom10_performers", "type": "table", "title": "Bottom 10 Performers", "bookmarkGroup": "Labor Performer View", "initiallyHidden": true,
+          "fields": ["dim_employee[full_name]", "dim_employee[department]", "dim_employee[shift]", "_Measures[Average Units Per Hour | Units/Hour]", "_Measures[Error Rate | %]", "_Measures[Total Units Processed | Units]", "_Measures[Employee Performance Bottom Rank | Rank]"],
+          "visualFilter": { "field": "_Measures[Employee Performance Bottom Rank | Rank]", "operator": "lessThanOrEqual", "value": 10 },
+          "sort": { "field": "_Measures[Employee Performance Bottom Rank | Rank]", "direction": "ascending" },
+          "position": [24, 490, 680, 386], "tooltipPage": "Labor Tooltip"
+        },
+        {
+          "id": "labor_cost_headcount", "type": "lineAndClusteredColumnChart", "title": "Labor Cost and Headcount Trend",
+          "xAxis": "dim_date[year_month]", "columnY": ["_Measures[Total Labor Cost | USD]"], "lineY": ["_Measures[Headcount (Active) | Employees]"],
+          "secondaryAxis": true, "sort": { "field": "dim_date[date_key]", "direction": "ascending" },
+          "position": [720, 490, 696, 386], "tooltipPage": "Labor Tooltip"
+        }
+      ],
+      "interactions": { "slicersFilterAll": true, "visualSelectionCrossFilters": true }
+    },
+    {
+      "name": "KPI Governance",
+      "displayName": "KPI Governance",
+      "pageType": "standard",
+      "visuals": [
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "position": [952, 14, 220, 54] },
+        { "id": "domain", "type": "slicer", "title": "KPI Domain", "field": "KPI Catalog[Domain]", "style": "tiles", "position": [1184, 14, 232, 54] },
+        { "id": "scorecard_button", "type": "button", "text": "Scorecard", "action": "bookmark", "bookmark": "Governance - Scorecard", "position": [24, 92, 132, 40] },
+        { "id": "trend_button", "type": "button", "text": "Trend Focus", "action": "bookmark", "bookmark": "Governance - Trends", "position": [164, 92, 132, 40] },
+        {
+          "id": "kpi_scorecard", "type": "matrix", "title": "Standardized KPI Scorecard", "bookmarkGroup": "Governance View",
+          "rows": ["KPI Catalog[Domain]", "KPI Catalog[KPI]"],
+          "values": ["KPI Catalog[Unit]", "_Measures[KPI Actual | Value]", "_Measures[KPI Target | Value]", "_Measures[KPI Variance to Target | Value]", "_Measures[KPI Status | RAG]"],
+          "sparkline": { "measure": "_Measures[KPI Actual | Value]", "xAxis": "dim_date[date_key]", "type": "line", "color": "#2B6CB0" },
+          "sort": { "field": "KPI Catalog[Sort Order]", "direction": "ascending" },
+          "conditionalFormatting": { "field": "_Measures[KPI Status | RAG]", "formatBy": "fieldValue", "basedOn": "_Measures[KPI Status Color | Hex]", "applyTo": "backgroundAndFont" },
+          "position": [24, 148, 1392, 728], "tooltipPage": "KPI Definition Tooltip"
+        },
+        {
+          "id": "kpi_trend_focus", "type": "lineChart", "title": "Selected KPI Trend", "bookmarkGroup": "Governance View", "initiallyHidden": true,
+          "xAxis": "dim_date[date_key]", "yAxis": ["_Measures[KPI Actual | Value]", "_Measures[KPI Target | Value]"],
+          "smallMultiples": "KPI Catalog[KPI]", "smallMultipleLimit": 12,
+          "position": [24, 148, 1392, 728], "tooltipPage": "KPI Definition Tooltip"
+        }
+      ],
+      "interactions": { "slicersFilterAll": true, "visualSelectionCrossFilters": true }
     }
   ],
   "tooltipPages": [
@@ -194,6 +274,16 @@
       "name": "Shipment Tooltip", "size": [320, 240],
       "fields": ["fact_shipment[carrier]", "fact_shipment[status]"],
       "measures": ["_Measures[Total Shipments | Shipments]", "_Measures[On-Time Delivery Rate | %]", "_Measures[Average Transit Days | Days]", "_Measures[Total Shipping Cost | USD]"]
+    },
+    {
+      "name": "Labor Tooltip", "size": [320, 240],
+      "fields": ["dim_employee[full_name]", "dim_employee[department]", "dim_employee[shift]"],
+      "measures": ["_Measures[Average Units Per Hour | Units/Hour]", "_Measures[Error Rate | %]", "_Measures[Total Units Processed | Units]", "_Measures[Total Labor Cost | USD]"]
+    },
+    {
+      "name": "KPI Definition Tooltip", "size": [360, 280],
+      "fields": ["KPI Catalog[KPI]", "KPI Catalog[Domain]", "KPI Catalog[Unit]", "KPI Catalog[Direction]"],
+      "measures": ["_Measures[KPI Definition | Text]", "_Measures[KPI Actual | Value]", "_Measures[KPI Target | Value]", "_Measures[KPI Status | RAG]"]
     }
   ],
   "fieldParameters": [
@@ -206,6 +296,23 @@
         { "label": "Monthly", "field": "dim_date[year_month]", "order": 2 }
       ]
     }
+  ],
+  "bookmarks": [
+    {
+      "name": "Labor - Top 10", "group": "Labor Performer View", "page": "Labor Productivity",
+      "display": { "show": ["top10_performers"], "hide": ["bottom10_performers"] }, "data": false
+    },
+    {
+      "name": "Labor - Bottom 10", "group": "Labor Performer View", "page": "Labor Productivity",
+      "display": { "show": ["bottom10_performers"], "hide": ["top10_performers"] }, "data": false
+    },
+    {
+      "name": "Governance - Scorecard", "group": "Governance View", "page": "KPI Governance",
+      "display": { "show": ["kpi_scorecard"], "hide": ["kpi_trend_focus"] }, "data": false
+    },
+    {
+      "name": "Governance - Trends", "group": "Governance View", "page": "KPI Governance",
+      "display": { "show": ["kpi_trend_focus"], "hide": ["kpi_scorecard"] }, "data": false
+    }
   ]
 }
-
