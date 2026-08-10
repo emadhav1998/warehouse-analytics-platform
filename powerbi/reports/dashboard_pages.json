@@ -1,13 +1,45 @@
 {
   "schemaVersion": "1.0",
   "reportName": "Warehouse Analytics",
-  "canvas": { "width": 1440, "height": 900, "display": "16:10" },
+  "canvas": { "width": 1636, "height": 900, "contentWidth": 1440, "display": "custom" },
   "theme": "../theme/warehouse_analytics_theme.json",
   "globalSettings": {
     "dateTable": "dim_date",
     "dateColumn": "dim_date[date_key]",
     "measureHomeTable": "_Measures",
     "syncSlicers": ["Date Range", "Warehouse", "Category"],
+    "layoutStandards": {
+      "pagePadding": 24,
+      "visualGap": 16,
+      "visualCornerRadius": 8,
+      "visualBorderColor": "#E2E8F0",
+      "visualBackground": "#FFFFFF",
+      "titleFont": "Segoe UI Semibold",
+      "bodyFont": "Segoe UI",
+      "titleSize": 14,
+      "bodySize": 11,
+      "headerHeight": 72,
+      "navigationWidth": 196
+    },
+    "navigationPane": {
+      "componentId": "primary_page_navigation",
+      "type": "pageNavigator",
+      "orientation": "vertical",
+      "position": [0, 72, 196, 828],
+      "contentOffset": [196, 0],
+      "applyToPages": ["Executive Overview", "Inventory Analysis", "Shipment Performance", "Labor Productivity", "KPI Governance"],
+      "excludePages": ["Late Shipment Detail"],
+      "buttons": [
+        { "label": "Executive Overview", "destination": "Executive Overview", "icon": "Home" },
+        { "label": "Inventory Analysis", "destination": "Inventory Analysis", "icon": "Database" },
+        { "label": "Shipment Performance", "destination": "Shipment Performance", "icon": "Truck" },
+        { "label": "Labor Productivity", "destination": "Labor Productivity", "icon": "People" },
+        { "label": "KPI Governance", "destination": "KPI Governance", "icon": "Scorecard" }
+      ],
+      "defaultStyle": { "fill": "#FFFFFF", "text": "#2D3748", "border": "#E2E8F0" },
+      "selectedStyle": { "fill": "#1A365D", "text": "#FFFFFF", "border": "#1A365D" },
+      "hoverStyle": { "fill": "#EBF8FF", "text": "#1A365D", "border": "#90CDF4" }
+    },
     "colors": {
       "navy": "#1A365D",
       "blue": "#2B6CB0",

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "timeZone": "Eastern Standard Time",
+  "enabled": true,
+  "serviceSchedule": {
+    "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "times": ["06:00", "10:00", "14:00", "18:00"],
+    "notifyOnFailure": true,
+    "disableAfterConsecutiveFailures": 4
+  },
+  "gateway": {
+    "required": true,
+    "dataSource": "Warehouse Analytics SQL Server",
+    "privacyLevel": "Organizational",
+    "credentialOwner": "Power BI service account"
+  },
+  "parameters": {
+    "RangeStart": "2025-01-01T00:00:00",
+    "RangeEnd": "2025-02-01T00:00:00"
+  },
+  "incrementalRefreshPolicies": [
+    { "table": "fact_inventory", "dateColumn": "date_key", "archivePeriods": 5, "archiveUnit": "Years", "refreshPeriods": 10, "refreshUnit": "Days", "onlyRefreshCompletePeriods": true },
+    { "table": "fact_shipment", "dateColumn": "date_key", "archivePeriods": 5, "archiveUnit": "Years", "refreshPeriods": 10, "refreshUnit": "Days", "onlyRefreshCompletePeriods": true },
+    { "table": "fact_labor", "dateColumn": "date_key", "archivePeriods": 5, "archiveUnit": "Years", "refreshPeriods": 10, "refreshUnit": "Days", "onlyRefreshCompletePeriods": true }
+  ],
+  "fullRefreshTables": [
+    "dim_date",
+    "dim_warehouse",
+    "dim_product",
+    "dim_employee",
+    "agg_inventory_monthly",
+    "agg_shipment_monthly",
+    "agg_labor_monthly",
+    "_Measures",
+    "KPI Catalog"
+  ]
+}
+

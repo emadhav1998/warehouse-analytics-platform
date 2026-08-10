@@ -1,121 +1,164 @@
 {
-    "name": "Warehouse Analytics",
-    "dataColors": [
-        "#1a365d",
-        "#2b6cb0",
-        "#38a169",
-        "#d69e2e",
-        "#e53e3e",
-        "#718096",
-        "#4299e1",
-        "#48bb78"
-    ],
-    "background": "#f7fafc",
-    "foreground": "#2d3748",
-    "tableAccent": "#2b6cb0",
-    "visualStyles": {
-        "*": {
-            "*": {
-                "fontFamily": [{ "value": "Segoe UI" }],
-                "fontSize":   [{ "value": 11 }],
-                "color":      [{ "solid": { "color": "#2d3748" } }]
-            }
-        },
-        "card": {
-            "*": {
-                "background": [{ "solid": { "color": "#ffffff" } }],
-                "border": [{
-                    "color": { "solid": { "color": "#e2e8f0" } },
-                    "radius": 8,
-                    "width": 1
-                }],
-                "shadow": [{ "show": true }]
-            }
-        },
-        "columnChart": {
-            "*": {
-                "categoryAxis": {
-                    "gridlineColor": [{ "solid": { "color": "#e2e8f0" } }],
-                    "labelColor":    [{ "solid": { "color": "#718096" } }]
-                },
-                "valueAxis": {
-                    "gridlineColor": [{ "solid": { "color": "#e2e8f0" } }],
-                    "labelColor":    [{ "solid": { "color": "#718096" } }]
-                }
-            }
-        },
-        "lineChart": {
-            "*": {
-                "categoryAxis": {
-                    "gridlineColor": [{ "solid": { "color": "#e2e8f0" } }],
-                    "labelColor":    [{ "solid": { "color": "#718096" } }]
-                },
-                "valueAxis": {
-                    "gridlineColor": [{ "solid": { "color": "#e2e8f0" } }],
-                    "labelColor":    [{ "solid": { "color": "#718096" } }]
-                }
-            }
-        },
-        "slicer": {
-            "*": {
-                "background": [{ "solid": { "color": "#ffffff" } }],
-                "border": [{
-                    "color": { "solid": { "color": "#e2e8f0" } },
-                    "radius": 6,
-                    "width": 1
-                }]
-            }
-        },
-        "tableEx": {
-            "*": {
-                "header": {
-                    "fontColor":        [{ "solid": { "color": "#ffffff" } }],
-                    "backColor":        [{ "solid": { "color": "#1a365d" } }],
-                    "fontSize":         [{ "value": 11 }],
-                    "fontBold":         [{ "value": true }]
-                },
-                "rows": {
-                    "fontColor":        [{ "solid": { "color": "#2d3748" } }],
-                    "backColor":        [{ "solid": { "color": "#ffffff" } }],
-                    "altFontColor":     [{ "solid": { "color": "#2d3748" } }],
-                    "altBackColor":     [{ "solid": { "color": "#f7fafc" } }],
-                    "fontSize":         [{ "value": 10 }]
-                }
-            }
-        },
-        "page": {
-            "*": {
-                "background": [{
-                    "color": { "solid": { "color": "#f7fafc" } },
-                    "transparency": 0
-                }],
-                "outspace": [{
-                    "color": { "solid": { "color": "#e2e8f0" } },
-                    "transparency": 0
-                }]
-            }
-        }
+  "name": "Warehouse Analytics 2.0",
+  "dataColors": [
+    "#1A365D",
+    "#2B6CB0",
+    "#38A169",
+    "#D69E2E",
+    "#E53E3E",
+    "#718096",
+    "#4299E1",
+    "#48BB78"
+  ],
+  "good": "#38A169",
+  "neutral": "#D69E2E",
+  "bad": "#E53E3E",
+  "maximum": "#1A365D",
+  "center": "#D69E2E",
+  "minimum": "#E53E3E",
+  "null": "#CBD5E0",
+  "background": "#F7FAFC",
+  "foreground": "#2D3748",
+  "tableAccent": "#2B6CB0",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#FFFFFF" } },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#E2E8F0" } },
+            "radius": 8
+          }
+        ],
+        "title": [
+          {
+            "show": true,
+            "fontFamily": "Segoe UI Semibold",
+            "fontSize": 14,
+            "fontColor": { "solid": { "color": "#1A365D" } },
+            "alignment": "left"
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": true,
+            "foreground": { "solid": { "color": "#718096" } },
+            "background": { "solid": { "color": "#FFFFFF" } }
+          }
+        ]
+      }
     },
-    "textClasses": {
-        "callout": {
-            "fontSize": 42,
-            "fontFace": "Segoe UI",
-            "color":    "#1a365d"
-        },
-        "title": {
-            "fontSize": 16,
-            "fontFace": "Segoe UI",
-            "color":    "#1a365d"
-        },
-        "header": {
-            "fontSize": 12,
-            "fontFace": "Segoe UI",
-            "color":    "#2d3748"
-        },
-        "label": {
+    "card": {
+      "*": {
+        "labels": [
+          {
+            "fontFamily": "Segoe UI Semibold",
+            "fontSize": 30,
+            "color": { "solid": { "color": "#1A365D" } },
+            "displayUnits": 0,
+            "decimalPlaces": 2
+          }
+        ],
+        "categoryLabels": [
+          {
+            "show": true,
+            "fontFamily": "Segoe UI",
+            "fontSize": 11,
+            "color": { "solid": { "color": "#718096" } }
+          }
+        ]
+      }
+    },
+    "slicer": {
+      "*": {
+        "header": [
+          {
+            "show": true,
+            "fontFamily": "Segoe UI Semibold",
+            "fontSize": 11,
+            "fontColor": { "solid": { "color": "#2D3748" } },
+            "background": { "solid": { "color": "#FFFFFF" } }
+          }
+        ],
+        "items": [
+          {
+            "fontFamily": "Segoe UI",
             "fontSize": 10,
-            "fontFace": "Segoe UI",
-            "color":    "#718096"
-        }
+            "fontColor": { "solid": { "color": "#2D3748" } },
+            "background": { "solid": { "color": "#FFFFFF" } }
+          }
+        ]
+      }
+    },
+    "tableEx": {
+      "*": {
+        "columnHeaders": [
+          {
+            "fontFamily": "Segoe UI Semibold",
+            "fontSize": 11,
+            "fontColor": { "solid": { "color": "#FFFFFF" } },
+            "backColor": { "solid": { "color": "#1A365D" } },
+            "outline": "BottomOnly",
+            "outlineColor": { "solid": { "color": "#E2E8F0" } }
+          }
+        ],
+        "values": [
+          {
+            "fontFamily": "Segoe UI",
+            "fontSize": 10,
+            "fontColorPrimary": { "solid": { "color": "#2D3748" } },
+            "backColorPrimary": { "solid": { "color": "#FFFFFF" } },
+            "fontColorSecondary": { "solid": { "color": "#2D3748" } },
+            "backColorSecondary": { "solid": { "color": "#F7FAFC" } },
+            "outlineColor": { "solid": { "color": "#EDF2F7" } }
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": { "solid": { "color": "#F7FAFC" } },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": { "solid": { "color": "#E2E8F0" } },
+            "transparency": 0
+          }
+        ]
+      }
     }
+  },
+  "textClasses": {
+    "callout": {
+      "fontSize": 30,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#1A365D"
+    },
+    "title": {
+      "fontSize": 14,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#1A365D"
+    },
+    "header": {
+      "fontSize": 11,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#2D3748"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI",
+      "color": "#718096"
+    }
+  }
 }

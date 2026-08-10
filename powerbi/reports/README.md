@@ -15,12 +15,44 @@ visual interactions, and conditional-formatting rules.
 6. Create the disconnected `KPI Catalog` calculated table from `../measures/kpi_governance.dax`. Sort `KPI Catalog[KPI]`
    by `KPI Catalog[Sort Order]`; do not create relationships from this table.
 7. Create the field parameter from `../measures/field_parameters.dax`.
-8. Build pages and visuals from `dashboard_pages.json`, using the supplied pixel positions on a 1440 × 900 canvas.
+8. Build pages and visuals from `dashboard_pages.json` on the 1636 x 900 custom canvas. Visual positions use the
+   1440-pixel content area after the 196-pixel navigation offset.
 9. Sync Date Range and Warehouse across visible pages. Sync Category only where inventory context is relevant. Category filters inventory visuals
    only because the current model has no product relationship to shipment or labor facts.
 10. Create the four bookmarks defined in `dashboard_pages.json`. Turn **Data** off for each bookmark so Top/Bottom and
     Scorecard/Trend toggles preserve slicer selections; capture only the display state of the named bookmark group.
 11. Hide the tooltip and Late Shipment Detail pages, then test drill-through with **Keep all filters** enabled.
+
+## Publishing and refresh
+
+- Apply the reusable page navigator from `dashboard_pages.json` to every visible page. The hidden drill-through page keeps
+  its Back button and is intentionally excluded from primary navigation.
+- Configure the gateway and four daily refresh slots from `../config/refresh_schedule.json`. Before publishing, create
+  `RangeStart` and `RangeEnd` Date/Time parameters and filter each fact query with `date_key >= RangeStart` and
+  `date_key < RangeEnd`; then apply the matching incremental-refresh policy in the table properties.
+- The initial parameter dates are development-window values only. Power BI Service replaces them with managed partitions
+  after the first refresh.
+
+## Model optimization
+
+- Apply `../config/model_optimization.json` after all relationships and measures are present. Remove the listed duplicate
+  or unused columns from the report model, not from the warehouse mart, so API and dbt consumers remain compatible.
+- Keep relationship keys loaded but hidden. Disable Auto date/time and implicit measures, and keep dimension-to-fact
+  filtering single-direction.
+- The three dbt models under `../../dbt_warehouse/models/marts/aggregations/` provide monthly import aggregates for
+  inventory, shipment, and labor trends. Configure their aggregation mappings exactly as listed in the optimization file.
+
+## Automated QA
+
+Run the structural validation before publishing:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File powerbi/tests/validate_report.ps1
+```
+
+This checks theme parsing, navigation coverage, required slicers, cross-filter flags, drill-through targets, bookmark
+references, refresh policies, removed-column safety, and aggregate-model mappings. Complete final visual rendering,
+keyboard navigation, mobile layout, gateway credentials, and service refresh tests in Power BI Desktop/Service.
 
 ## Formatting conventions
 
