@@ -2,7 +2,7 @@ import unittest
 from datetime import date
 
 from app.main import app, health_check
-from app.routers.inventory import get_inventory_alerts, get_inventory_summary
+from app.routers.inventory import get_inventory_alerts, get_inventory_summary, get_warehouses
 from app.routers.kpis import _rag_status, get_kpi_dashboard
 from app.routers.shipments import get_shipment_performance
 
@@ -41,6 +41,7 @@ class ApiTests(unittest.TestCase):
         self.assertIn("/api/v1/kpis/dashboard", paths)
         self.assertIn("/api/v1/inventory/summary", paths)
         self.assertIn("/api/v1/inventory/alerts", paths)
+        self.assertIn("/api/v1/inventory/warehouses", paths)
         self.assertIn("/api/v1/shipments/performance", paths)
 
     def test_rag_status(self):
@@ -76,6 +77,17 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(all(call[1]["wh_id"] == 1 for call in db.calls))
 
     def test_inventory_and_shipment_mapping(self):
+        warehouse_db = FakeSession([[
+            {
+                "warehouse_id": 1,
+                "warehouse_code": "WH-EAST-01",
+                "warehouse_name": "East Distribution Center",
+                "city_state": "Newark, NJ",
+            }
+        ]])
+        warehouses = get_warehouses(db=warehouse_db)
+        self.assertEqual(warehouses[0].warehouse_id, 1)
+
         inventory_db = FakeSession([[
             {
                 "warehouse_name": "East Distribution Center",
@@ -121,4 +133,3 @@ class ApiTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

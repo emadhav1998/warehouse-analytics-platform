@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Warehouse Analytics mart data dictionary.">
+  <title>Warehouse Analytics | Data Dictionary</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="dictionary" data-api-base="http://localhost:8000/api/v1">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <nav class="sidebar" aria-label="Primary navigation">
+    <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">WH</span><span><strong>Warehouse</strong><small>Analytics</small></span></a>
+    <ul class="nav-links">
+      <li><a href="../index.html"><span aria-hidden="true">▦</span>Dashboard</a></li>
+      <li><a href="kpi-catalog.html"><span aria-hidden="true">◎</span>KPI Catalog</a></li>
+      <li><a href="data-dictionary.html" aria-current="page"><span aria-hidden="true">≡</span>Data Dictionary</a></li>
+    </ul>
+    <div class="sidebar-footer"><span class="live-dot" aria-hidden="true"></span>Governed metrics</div>
+  </nav>
+  <main class="content" id="main-content">
+    <header class="page-header"><div><p class="eyebrow">Semantic model</p><h1>Data Dictionary</h1><p class="subtitle">Business-ready mart tables, columns, data types, and definitions</p></div><label class="search-control" for="dictionarySearch"><span class="sr-only">Search data dictionary</span><input id="dictionarySearch" type="search" placeholder="Search tables or columns…"></label></header>
+    <div class="dictionary-summary" id="dictionarySummary"></div>
+    <section id="dictionaryTables" class="dictionary-tables" aria-label="Data dictionary tables"></section>
+    <p id="dictionaryEmpty" class="empty-state" hidden>No tables or columns match your search.</p>
+  </main>
+  <script src="../js/data-dictionary.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>
+

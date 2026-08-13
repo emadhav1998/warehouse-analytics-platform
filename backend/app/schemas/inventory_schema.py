@@ -10,3 +10,9 @@ class InventoryAlert(BaseModel):
     status: str
     reorder_point: int
 
+
+class WarehouseOption(BaseModel):
+    warehouse_id: int
+    warehouse_code: str
+    warehouse_name: str
+    city_state: str

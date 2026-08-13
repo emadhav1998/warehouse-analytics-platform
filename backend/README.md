@@ -19,6 +19,7 @@ in `.env` for other environments. Do not commit `.env`.
 - `GET /api/v1/kpis/definitions`
 - `GET /api/v1/inventory/summary?warehouse_id=1`
 - `GET /api/v1/inventory/alerts?warehouse_id=1&limit=50`
+- `GET /api/v1/inventory/warehouses`
 - `GET /api/v1/shipments/performance?days=30&warehouse_id=1`
 - `GET /api/v1/labor/productivity?warehouse_id=1&department=Picking`
 - `GET /api/v1/validation/data-quality`

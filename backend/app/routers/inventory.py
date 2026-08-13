@@ -3,11 +3,27 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.inventory_schema import InventoryAlert
+from app.schemas.inventory_schema import InventoryAlert, WarehouseOption
 from app.schemas.kpi_schema import InventorySummary
 
 
 router = APIRouter()
+
+
+@router.get("/warehouses", response_model=list[WarehouseOption])
+def get_warehouses(db: Session = Depends(get_db)) -> list[WarehouseOption]:
+    query = text("""
+        SELECT
+            warehouse_id,
+            warehouse_code,
+            warehouse_name,
+            city_state
+        FROM mart.dim_warehouse
+        WHERE is_active = 1
+        ORDER BY warehouse_name
+    """)
+    rows = db.execute(query).mappings().all()
+    return [WarehouseOption(**row) for row in rows]
 
 
 @router.get("/summary", response_model=list[InventorySummary])
@@ -67,4 +83,3 @@ def get_inventory_alerts(
     """)
     rows = db.execute(query, {"wh_id": warehouse_id, "limit": limit}).mappings().all()
     return [InventoryAlert(**row) for row in rows]
-
