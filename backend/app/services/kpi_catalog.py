@@ -1,0 +1,66 @@
+from typing import Any
+
+
+def _kpi(
+    name: str,
+    domain: str,
+    description: str,
+    formula: str,
+    unit: str,
+    owner: str,
+    frequency: str = "Daily",
+    target: float | None = None,
+) -> dict[str, Any]:
+    return {
+        "kpi_name": name,
+        "domain": domain,
+        "description": description,
+        "formula": formula,
+        "unit": unit,
+        "target": target,
+        "frequency": frequency,
+        "owner": owner,
+    }
+
+
+KPI_DEFINITIONS = [
+    _kpi("Total Inventory Value (Cost)", "Inventory", "Inventory on hand valued at unit cost.", "SUM(inventory_value_at_cost)", "USD", "Inventory Manager"),
+    _kpi("Total Inventory Value (Retail)", "Inventory", "Inventory on hand valued at retail price.", "SUM(inventory_value_at_retail)", "USD", "Inventory Manager"),
+    _kpi("Total Quantity On Hand", "Inventory", "Total physical inventory currently held.", "SUM(quantity_on_hand)", "Units", "Inventory Manager"),
+    _kpi("Total Quantity Available", "Inventory", "Inventory available after reservations.", "SUM(quantity_available)", "Units", "Inventory Manager"),
+    _kpi("Inventory Utilization", "Inventory", "Share of on-hand inventory currently reserved.", "(On Hand - Available) / On Hand x 100", "%", "Inventory Manager", target=85.0),
+    _kpi("Stock Out Rate", "Inventory", "Share of inventory records classified as out of stock.", "COUNT(Out of Stock) / COUNT(Inventory Records) x 100", "%", "Inventory Manager", target=2.0),
+    _kpi("Items Below Reorder Point", "Inventory", "Inventory records requiring replenishment.", "COUNT(needs_reorder = 1)", "Items", "Replenishment Manager", target=0.0),
+    _kpi("Inventory Accuracy", "Inventory", "Records where on hand equals reserved plus available.", "COUNT(Balanced Records) / COUNT(Inventory Records) x 100", "%", "Inventory Control", target=99.0),
+    _kpi("Days of Supply", "Inventory", "Estimated inventory coverage at average daily usage.", "On Hand / Average Daily Usage", "Days", "Inventory Planning", target=30.0),
+    _kpi("Expiring Items (30 Days)", "Inventory", "Inventory records expiring within 30 days.", "COUNT(expiring_within_30_days = 1)", "Items", "Inventory Control", target=0.0),
+    _kpi("Inventory Value MoM Change", "Inventory", "Month-over-month change in inventory value at cost.", "(Current Value - Prior Month Value) / Prior Month Value x 100", "%", "Inventory Manager", "Monthly"),
+    _kpi("Total Shipments", "Shipment", "Total shipment records in the selected period.", "COUNTROWS(fact_shipment)", "Shipments", "Logistics Manager"),
+    _kpi("On-Time Delivery Rate", "Shipment", "On-time shipments as a share of delivered shipments.", "COUNT(On Time) / COUNT(Delivered) x 100", "%", "Logistics Manager", target=95.0),
+    _kpi("Late Shipment Count", "Shipment", "Shipments delivered after the expected date.", "COUNT(is_late = 1)", "Shipments", "Logistics Manager", target=0.0),
+    _kpi("Average Transit Days", "Shipment", "Average actual shipment transit duration.", "AVERAGE(actual_transit_days)", "Days", "Logistics Manager", target=3.0),
+    _kpi("Total Shipping Cost", "Shipment", "Total freight and shipment cost.", "SUM(shipping_cost)", "USD", "Transportation Manager"),
+    _kpi("Cost Per Shipment", "Shipment", "Average shipping cost per shipment.", "Total Shipping Cost / Total Shipments", "USD/Shipment", "Transportation Manager", target=25.0),
+    _kpi("Shipment Fill Rate", "Shipment", "Shipped quantity relative to expected items.", "SUM(total_quantity) / SUM(total_items) x 100", "%", "Logistics Manager", target=98.0),
+    _kpi("Cancellation Rate", "Shipment", "Cancelled shipments as a share of all shipments.", "COUNT(Cancelled) / Total Shipments x 100", "%", "Logistics Manager", target=1.0),
+    _kpi("Return Rate", "Shipment", "Returned shipments as a share of all shipments.", "COUNT(Returned) / Total Shipments x 100", "%", "Customer Operations", target=2.0),
+    _kpi("Inbound vs Outbound Ratio", "Shipment", "Inbound shipment volume relative to outbound volume.", "Inbound Shipments / Outbound Shipments", "Ratio", "Logistics Manager"),
+    _kpi("Shipments YTD", "Shipment", "Calendar year-to-date shipment count.", "CALCULATE(Total Shipments, DATESYTD(date_key))", "Shipments", "Logistics Manager"),
+    _kpi("Shipping Cost YTD", "Shipment", "Calendar year-to-date shipping cost.", "CALCULATE(Total Shipping Cost, DATESYTD(date_key))", "USD", "Transportation Manager"),
+    _kpi("Total Labor Hours", "Labor", "Total recorded employee labor hours.", "SUM(total_hours)", "Hours", "Operations Manager"),
+    _kpi("Total Labor Cost", "Labor", "Total calculated labor expense.", "SUM(labor_cost)", "USD", "Finance"),
+    _kpi("Total Units Processed", "Labor", "Total units completed by labor activities.", "SUM(total_units)", "Units", "Operations Manager"),
+    _kpi("Average Units Per Hour", "Labor", "Processed units per labor hour.", "Total Units Processed / Total Labor Hours", "Units/Hour", "Operations Manager", target=75.0),
+    _kpi("Labor Efficiency Index", "Labor", "Productivity relative to the 75 UPH benchmark.", "Average UPH / 75 x 100", "%", "Operations Manager", target=100.0),
+    _kpi("Error Rate", "Labor", "Recorded errors relative to processed units.", "SUM(total_errors) / Total Units Processed x 100", "%", "Quality Manager", target=1.0),
+    _kpi("Cost Per Unit Processed", "Labor", "Labor cost required per processed unit.", "Total Labor Cost / Total Units Processed", "USD/Unit", "Finance", target=2.0),
+    _kpi("Headcount (Active)", "Labor", "Distinct employees represented in labor activity.", "DISTINCTCOUNT(employee_id)", "Employees", "Operations Manager"),
+    _kpi("Average Hours Per Employee", "Labor", "Average labor hours per active employee.", "Total Labor Hours / Active Headcount", "Hours/Employee", "Operations Manager", target=8.0),
+    _kpi("Overtime Indicator", "Labor", "Employee-days with more than eight labor hours.", "COUNT(Employee-Day where Daily Hours > 8)", "Employee-Days", "Operations Manager", target=0.0),
+    _kpi("High Performers Count", "Labor", "Labor records classified in the high productivity tier.", "COUNT(productivity_tier = High)", "Labor Records", "Operations Manager"),
+    _kpi("Labor Cost MTD", "Labor", "Calendar month-to-date labor cost.", "CALCULATE(Total Labor Cost, DATESMTD(date_key))", "USD", "Finance"),
+    _kpi("Labor Cost QTD", "Labor", "Calendar quarter-to-date labor cost.", "CALCULATE(Total Labor Cost, DATESQTD(date_key))", "USD", "Finance"),
+    _kpi("Labor Cost YTD", "Labor", "Calendar year-to-date labor cost.", "CALCULATE(Total Labor Cost, DATESYTD(date_key))", "USD", "Finance"),
+    _kpi("Units Processed YTD", "Labor", "Calendar year-to-date processed units.", "CALCULATE(Total Units Processed, DATESYTD(date_key))", "Units", "Operations Manager"),
+]
+

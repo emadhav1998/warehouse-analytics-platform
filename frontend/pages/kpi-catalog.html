@@ -18,7 +18,7 @@
     <div class="sidebar-footer"><span class="live-dot" aria-hidden="true"></span>Governed metrics</div>
   </nav>
   <main class="content" id="main-content">
-    <header class="page-header"><div><p class="eyebrow">Governance library</p><h1>KPI Catalog</h1><p class="subtitle">Approved definitions, targets, ownership, and reporting cadence</p></div><label class="search-control" for="catalogSearch"><span class="sr-only">Search KPIs</span><input id="catalogSearch" type="search" placeholder="Search KPIs, owners, formulas…"></label></header>
+    <header class="page-header"><div><p class="eyebrow">Governance library</p><h1>KPI Catalog</h1><p class="subtitle">Approved definitions, targets, ownership, and reporting cadence</p></div><div class="header-controls"><label class="filter-control" for="catalogDomain"><span>Domain</span><select id="catalogDomain"><option value="">All domains</option></select></label><label class="search-control" for="catalogSearch"><span>Search</span><input id="catalogSearch" type="search" placeholder="Search KPIs, owners, formulas…"></label></div></header>
     <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
     <section class="catalog-grid" id="catalogGrid" aria-label="KPI definitions" aria-busy="true"></section>
     <p id="catalogEmpty" class="empty-state" hidden>No KPIs match your search.</p>
@@ -26,4 +26,3 @@
   <script src="../js/app.js" defer></script>
 </body>
 </html>
-

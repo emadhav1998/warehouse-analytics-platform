@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.kpi_schema import KPIDashboard, KPIDefinition, KPIValue
+from app.services.kpi_catalog import KPI_DEFINITIONS
 
 
 router = APIRouter()
@@ -113,14 +114,4 @@ def get_kpi_dashboard(
 
 @router.get("/definitions", response_model=list[KPIDefinition])
 def get_kpi_definitions() -> list[KPIDefinition]:
-    return [
-        KPIDefinition(kpi_name="Total Inventory Value", formula="SUM(inventory_value_at_cost)", unit="USD", target=15_000_000, frequency="Daily", owner="Inventory Manager"),
-        KPIDefinition(kpi_name="Stock-Out Rate", formula="COUNT(Out of Stock) / COUNT(Total Items) x 100", unit="%", target=3.0, frequency="Daily", owner="Inventory Manager"),
-        KPIDefinition(kpi_name="On-Time Delivery Rate", formula="COUNT(On Time) / COUNT(Delivered) x 100", unit="%", target=95.0, frequency="Daily", owner="Logistics Manager"),
-        KPIDefinition(kpi_name="Units Per Hour", formula="SUM(Units Processed) / SUM(Labor Hours)", unit="UPH", target=80.0, frequency="Daily", owner="Operations Manager"),
-        KPIDefinition(kpi_name="Error Rate", formula="SUM(Errors) / SUM(Units Processed) x 100", unit="%", target=2.0, frequency="Daily", owner="Quality Manager"),
-        KPIDefinition(kpi_name="Labor Cost Per Unit", formula="SUM(Labor Cost) / SUM(Units Processed)", unit="USD", target=0.50, frequency="Weekly", owner="Finance"),
-        KPIDefinition(kpi_name="Inventory Turnover", formula="COGS / Average Inventory Value", unit="Turns", target=12.0, frequency="Monthly", owner="Finance"),
-        KPIDefinition(kpi_name="Perfect Order Rate", formula="COUNT(Perfect Orders) / COUNT(Total Orders) x 100", unit="%", target=98.0, frequency="Weekly", owner="Operations Manager"),
-    ]
-
+    return [KPIDefinition(**definition) for definition in KPI_DEFINITIONS]

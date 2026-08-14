@@ -20,6 +20,12 @@ foreach ($file in $htmlFiles) {
 }
 
 $dictionaryScript = Get-Content -Raw -LiteralPath (Join-Path $frontendRoot "js\data-dictionary.js")
+$catalogHtml = Get-Content -Raw -LiteralPath (Join-Path $frontendRoot "pages\kpi-catalog.html")
+$dictionaryHtml = Get-Content -Raw -LiteralPath (Join-Path $frontendRoot "pages\data-dictionary.html")
+if ($catalogHtml -notmatch 'id="catalogSearch"' -or $catalogHtml -notmatch 'id="catalogDomain"') { throw "KPI Catalog requires search and domain filters." }
+if ($dictionaryHtml -notmatch 'id="dictionarySearch"' -or $dictionaryHtml -notmatch 'id="dictionaryKind"') { throw "Data Dictionary requires search and table-type filters." }
+Write-Output "PASS: both reference pages expose search and filter controls"
+
 $martModels = Get-ChildItem -Path (Join-Path (Split-Path -Parent $frontendRoot) "dbt_warehouse\models\marts") -File -Filter "*.sql"
 $martModels += Get-ChildItem -Path (Join-Path (Split-Path -Parent $frontendRoot) "dbt_warehouse\models\marts\aggregations") -File -Filter "*.sql"
 foreach ($model in $martModels) {
@@ -32,4 +38,3 @@ Write-Output "PASS: data dictionary covers $($martModels.Count) mart models"
 $appScript = Get-Content -Raw -LiteralPath (Join-Path $frontendRoot "js\app.js")
 if ($appScript -match '\.innerHTML\s*=') { throw "app.js must not inject API data through innerHTML." }
 Write-Output "PASS: live API rendering avoids innerHTML injection"
-

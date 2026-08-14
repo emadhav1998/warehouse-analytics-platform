@@ -20,9 +20,11 @@ class KPIDashboard(BaseModel):
 
 class KPIDefinition(BaseModel):
     kpi_name: str
+    domain: str
+    description: str
     formula: str
     unit: str
-    target: float
+    target: float | None = None
     frequency: str
     owner: str
 
@@ -34,4 +36,3 @@ class InventorySummary(BaseModel):
     total_value: float
     stockout_count: int
     reorder_count: int
-

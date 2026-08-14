@@ -3,7 +3,7 @@ from datetime import date
 
 from app.main import app, health_check
 from app.routers.inventory import get_inventory_alerts, get_inventory_summary, get_warehouses
-from app.routers.kpis import _rag_status, get_kpi_dashboard
+from app.routers.kpis import _rag_status, get_kpi_dashboard, get_kpi_definitions
 from app.routers.shipments import get_shipment_performance
 
 
@@ -52,6 +52,12 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(_rag_status(4, 3, lower_is_better=True), "Yellow")
         self.assertEqual(_rag_status(5, 3, lower_is_better=True), "Red")
         self.assertIsNone(_rag_status(100, None))
+
+    def test_kpi_catalog_is_complete_and_described(self):
+        definitions = get_kpi_definitions()
+        self.assertEqual(len(definitions), 38)
+        self.assertEqual({item.domain for item in definitions}, {"Inventory", "Shipment", "Labor"})
+        self.assertTrue(all(item.description and item.formula and item.owner for item in definitions))
 
     def test_kpi_dashboard_uses_live_query_results(self):
         db = FakeSession([

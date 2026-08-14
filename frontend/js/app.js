@@ -114,9 +114,10 @@ function renderCatalog(definitions) {
   container.replaceChildren(...definitions.map((kpi) => {
     const article = makeElement('article', 'catalog-card');
     article.dataset.search = Object.values(kpi).join(' ').toLowerCase();
-    article.append(makeElement('p', 'eyebrow', kpi.frequency), makeElement('h2', '', kpi.kpi_name), makeElement('div', 'formula', kpi.formula));
+    article.dataset.domain = kpi.domain;
+    article.append(makeElement('p', 'eyebrow', `${kpi.domain} · ${kpi.frequency}`), makeElement('h2', '', kpi.kpi_name), makeElement('p', 'catalog-description', kpi.description), makeElement('div', 'formula', kpi.formula));
     const meta = makeElement('dl', 'meta-grid');
-    [['Owner', kpi.owner], ['Unit', kpi.unit], ['Target', formatValue(kpi.target, kpi.unit)], ['Cadence', kpi.frequency]].forEach(([term, value]) => {
+    [['Owner', kpi.owner], ['Unit', kpi.unit], ['Target', kpi.target === null ? 'Not set' : formatValue(kpi.target, kpi.unit)], ['Cadence', kpi.frequency]].forEach(([term, value]) => {
       const group = document.createElement('div'); group.append(makeElement('dt', '', term), makeElement('dd', '', value)); meta.append(group);
     });
     article.append(meta);
@@ -129,11 +130,14 @@ async function loadCatalog() {
   try {
     renderCatalog(await requestJson('/kpis/definitions'));
     const input = document.getElementById('catalogSearch');
-    input.addEventListener('input', () => {
+    const domain = document.getElementById('catalogDomain');
+    [...new Set([...document.querySelectorAll('.catalog-card')].map((card) => card.dataset.domain))].sort().forEach((value) => { const option = document.createElement('option'); option.value = value; option.textContent = value; domain.append(option); });
+    const filterCatalog = () => {
       const query = input.value.trim().toLowerCase(); let visible = 0;
-      document.querySelectorAll('.catalog-card').forEach((card) => { const show = card.dataset.search.includes(query); card.hidden = !show; if (show) visible += 1; });
+      document.querySelectorAll('.catalog-card').forEach((card) => { const show = card.dataset.search.includes(query) && (!domain.value || card.dataset.domain === domain.value); card.hidden = !show; if (show) visible += 1; });
       document.getElementById('catalogEmpty').hidden = visible !== 0;
-    });
+    };
+    input.addEventListener('input', filterCatalog); domain.addEventListener('change', filterCatalog);
   } catch (error) { setMessage(`Unable to load KPI definitions. ${error.message}`); }
 }
 
@@ -144,4 +148,3 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (page === 'catalog') loadCatalog();
   else if (page === 'dictionary' && window.initializeDictionary) window.initializeDictionary();
 });
-

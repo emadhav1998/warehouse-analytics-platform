@@ -18,7 +18,7 @@
     <div class="sidebar-footer"><span class="live-dot" aria-hidden="true"></span>Governed metrics</div>
   </nav>
   <main class="content" id="main-content">
-    <header class="page-header"><div><p class="eyebrow">Semantic model</p><h1>Data Dictionary</h1><p class="subtitle">Business-ready mart tables, columns, data types, and definitions</p></div><label class="search-control" for="dictionarySearch"><span class="sr-only">Search data dictionary</span><input id="dictionarySearch" type="search" placeholder="Search tables or columns…"></label></header>
+    <header class="page-header"><div><p class="eyebrow">Semantic model</p><h1>Data Dictionary</h1><p class="subtitle">Business-ready mart tables, columns, data types, and definitions</p></div><div class="header-controls"><label class="filter-control" for="dictionaryKind"><span>Table type</span><select id="dictionaryKind"><option value="">All types</option><option value="Dimension">Dimensions</option><option value="Fact">Facts</option><option value="Aggregate">Aggregates</option></select></label><label class="search-control" for="dictionarySearch"><span>Search</span><input id="dictionarySearch" type="search" placeholder="Search tables or columns…"></label></div></header>
     <div class="dictionary-summary" id="dictionarySummary"></div>
     <section id="dictionaryTables" class="dictionary-tables" aria-label="Data dictionary tables"></section>
     <p id="dictionaryEmpty" class="empty-state" hidden>No tables or columns match your search.</p>
@@ -27,4 +27,3 @@
   <script src="../js/app.js" defer></script>
 </body>
 </html>
-
