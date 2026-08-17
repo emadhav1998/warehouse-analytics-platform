@@ -11,7 +11,7 @@ select
     labor_fact_key,
     employee_id,
     employee_name,
-    activity_date,
+    date_key,
     activity_type,
     total_hours
 from {{ ref('fact_labor') }}

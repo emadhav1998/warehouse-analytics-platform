@@ -26,3 +26,6 @@ Thumbs.db
 target/
 dbt_packages/
 logs/
+
+# Generated validation reports
+scripts/reports/*.json
