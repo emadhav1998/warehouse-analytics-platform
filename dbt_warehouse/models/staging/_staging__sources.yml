@@ -5,14 +5,14 @@ sources:
     database: WarehouseAnalyticsDB
     schema: raw
     loaded_at_field: created_at
-    freshness:
-      warn_after:  {count: 24, period: hour}
-      error_after: {count: 48, period: hour}
 
     tables:
 
       - name: warehouses
         description: "Physical warehouse locations and capacity information"
+        freshness:
+          warn_after: {count: 7, period: day}
+          error_after: {count: 14, period: day}
         columns:
           - name: warehouse_id
             description: "Surrogate primary key"
@@ -23,6 +23,9 @@ sources:
 
       - name: products
         description: "Product catalog with pricing and physical attributes"
+        freshness:
+          warn_after: {count: 7, period: day}
+          error_after: {count: 14, period: day}
         columns:
           - name: product_id
             description: "Surrogate primary key"
@@ -33,6 +36,9 @@ sources:
 
       - name: employees
         description: "Warehouse workforce with department and shift assignments"
+        freshness:
+          warn_after: {count: 7, period: day}
+          error_after: {count: 14, period: day}
         columns:
           - name: employee_id
             description: "Surrogate primary key"
@@ -43,6 +49,9 @@ sources:
 
       - name: inventory
         description: "Daily inventory snapshots by warehouse and product"
+        freshness:
+          warn_after: {count: 26, period: hour}
+          error_after: {count: 50, period: hour}
         columns:
           - name: inventory_id
             description: "Surrogate primary key"
@@ -53,6 +62,9 @@ sources:
 
       - name: shipments
         description: "Inbound and outbound shipment records"
+        freshness:
+          warn_after: {count: 26, period: hour}
+          error_after: {count: 50, period: hour}
         columns:
           - name: shipment_id
             description: "Surrogate primary key"
@@ -75,6 +87,9 @@ sources:
 
       - name: shipment_items
         description: "Line-item details for each shipment"
+        freshness:
+          warn_after: {count: 26, period: hour}
+          error_after: {count: 50, period: hour}
         columns:
           - name: shipment_item_id
             description: "Surrogate primary key"
@@ -88,6 +103,9 @@ sources:
 
       - name: labor_activities
         description: "Employee labor activity records with productivity metrics"
+        freshness:
+          warn_after: {count: 26, period: hour}
+          error_after: {count: 50, period: hour}
         columns:
           - name: activity_id
             description: "Surrogate primary key"

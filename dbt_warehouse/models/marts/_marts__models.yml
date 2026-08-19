@@ -151,6 +151,18 @@ models:
     description: >
       Daily inventory snapshot fact table. One row per warehouse + product +
       snapshot_date. Joined to dim_warehouse and dim_product via surrogate keys.
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1
+      - row_count_anomaly:
+          arguments:
+            date_column: date_key
+            lookback_days: 14
+            max_deviation_pct: 0.50
+            min_baseline_days: 3
+          config:
+            severity: warn
     columns:
       - name: inventory_fact_key
         description: "Surrogate key: MD5 of snapshot_date || warehouse_id || product_id"
@@ -170,6 +182,19 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 1000000
+      - name: inventory_value_at_cost
+        description: "Inventory value at cost basis"
+        tests:
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 1000000000
       - name: quantity_available
         description: "Units available for picking (on_hand minus reserved)"
         tests:
@@ -200,6 +225,18 @@ models:
     description: >
       Shipment fact table. One row per shipment. Includes delivery performance,
       transit-time measures, and line-item aggregates from stg_shipment_items.
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1
+      - row_count_anomaly:
+          arguments:
+            date_column: date_key
+            lookback_days: 14
+            max_deviation_pct: 0.50
+            min_baseline_days: 3
+          config:
+            severity: warn
     columns:
       - name: shipment_fact_key
         description: "Surrogate key: MD5 of shipment_id"
@@ -236,12 +273,39 @@ models:
                 values: [0, 1]
       - name: shipping_cost
         description: "Total shipping cost for this shipment"
+        tests:
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 1000000
+      - name: actual_transit_days
+        description: "Actual elapsed transit time for delivered shipments"
+        tests:
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 365
+                row_condition: "actual_transit_days is not null"
 
   # ── fact_labor ─────────────────────────────────────────────────────────────
   - name: fact_labor
     description: >
       Labor productivity fact table. One row per employee + activity_type +
       activity_date. Joined to dim_warehouse and dim_employee via surrogate keys.
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1
+      - row_count_anomaly:
+          arguments:
+            date_column: date_key
+            lookback_days: 14
+            max_deviation_pct: 0.50
+            min_baseline_days: 3
+          config:
+            severity: warn
     columns:
       - name: labor_fact_key
         description: "Surrogate key: MD5 of activity_date || employee_id || activity_type"
@@ -268,8 +332,20 @@ models:
                 min_value: 0
                 max_value: 24
       - name: avg_units_per_hour
+        tests:
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 10000
         description: "Productivity: total_units / total_hours"
       - name: error_rate_pct
+        tests:
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              arguments:
+                quantile: 0.95
+                min_value: 0
+                max_value: 100
         description: "Quality: (total_errors / total_units) × 100"
       - name: labor_cost
         description: "Cost: total_hours × hourly_rate"
