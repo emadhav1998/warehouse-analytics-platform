@@ -5,14 +5,15 @@ warehouse_analytics:
     # ── Local development (Windows auth) ────────────────────────────────────
     dev:
       type: sqlserver
-      driver: 'ODBC Driver 17 for SQL Server'
-      server: localhost
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 17 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER', 'localhost') }}"
       port: 1433
-      database: WarehouseAnalyticsDB
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
       schema: staging
       # Windows-integrated auth — no username/password needed locally
-      windows_login: true
-      trust_cert: true
+      windows_login: "{{ env_var('DBT_WINDOWS_LOGIN', 'true') | as_bool }}"
+      encrypt: "{{ env_var('DBT_ENCRYPT', 'false') | as_bool }}"
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'true') | as_bool }}"
       # Optional SQL login override via environment variables
       user: "{{ env_var('DBT_USER', '') }}"
       password: "{{ env_var('DBT_PASSWORD', '') }}"
