@@ -134,3 +134,22 @@ def test_openapi_includes_day19_routes_and_validation_responses():
     assert "/api/v1/validation/data-quality" in schema["paths"]
     labor_responses = schema["paths"]["/api/v1/labor/productivity"]["get"]["responses"]
     assert "422" in labor_responses
+
+
+@pytest.mark.parametrize(
+    ("path", "params", "invalid_field"),
+    [
+        ("/api/v1/kpis/dashboard", {"warehouse_id": 0}, "warehouse_id"),
+        ("/api/v1/inventory/summary", {"warehouse_id": -1}, "warehouse_id"),
+        ("/api/v1/inventory/alerts", {"limit": 0}, "limit"),
+        ("/api/v1/inventory/alerts", {"limit": 201}, "limit"),
+        ("/api/v1/shipments/performance", {"days": 0}, "days"),
+        ("/api/v1/shipments/performance", {"days": 366}, "days"),
+    ],
+)
+def test_api_parameter_boundaries(path, params, invalid_field):
+    with TestClient(app) as client:
+        response = client.get(path, params=params)
+
+    assert response.status_code == 422
+    assert invalid_field in response.text

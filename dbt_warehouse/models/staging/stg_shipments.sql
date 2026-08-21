@@ -4,6 +4,21 @@ with source as (
 
 ),
 
+ranked as (
+
+    -- Defensively retain one version per shipment. The source-level uniqueness
+    -- test still reports duplicates, while this guard prevents them from
+    -- multiplying shipment facts and downstream KPI values.
+    select
+        *,
+        row_number() over (
+            partition by shipment_id
+            order by updated_at desc, created_at desc
+        ) as source_row_number
+    from source
+
+),
+
 renamed as (
 
     select
@@ -36,9 +51,11 @@ renamed as (
         -- Derived delivery performance classification
         case
             when status = 'Cancelled'                                         then 'Cancelled'
-            when actual_delivery is not null
+            when status = 'Delivered'
+             and actual_delivery is not null
              and actual_delivery <= expected_delivery                          then 'On Time'
-            when actual_delivery is not null
+            when status = 'Delivered'
+             and actual_delivery is not null
              and actual_delivery >  expected_delivery                          then 'Late'
             else                                                                   'In Progress'
         end as delivery_performance,
@@ -46,7 +63,8 @@ renamed as (
         created_at,
         updated_at
 
-    from source
+    from ranked
+    where source_row_number = 1
 
 )
 

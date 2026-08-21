@@ -245,8 +245,9 @@ models:
         description: "FK to dim_warehouse"
         tests:
           - relationships:
-              to: ref('dim_warehouse')
-              field: warehouse_key
+              arguments:
+                to: ref('dim_warehouse')
+                field: warehouse_key
       - name: date_key
         description: "FK to dim_date (ship_date)"
         tests: [not_null]

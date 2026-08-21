@@ -67,19 +67,56 @@ class ApiTests(unittest.TestCase):
                 "stockout_count": 2,
                 "total_records": 100,
                 "reorder_count": 4,
+                "accurate_count": 99,
+                "quantity_on_hand": 10_000,
+                "average_daily_quantity": 500,
                 "as_of_date": date(2026, 8, 10),
             },
-            {"otd_rate": 96.5, "total_shipments": 200, "avg_transit": 2.4},
-            {"avg_uph": 82.25, "total_labor_cost": 125_000, "error_rate": 1.5},
+            {
+                "otd_rate": 96.5,
+                "total_shipments": 200,
+                "total_shipping_cost": 4_000,
+                "cancelled_shipments": 2,
+                "avg_transit": 2.4,
+            },
+            {
+                "avg_uph": 82.25,
+                "total_labor_cost": 125_000,
+                "error_rate": 1.5,
+                "cost_per_unit": 0.45,
+            },
         ])
 
         dashboard = get_kpi_dashboard(warehouse_id=1, db=db)
 
         self.assertEqual(dashboard.warehouse_id, 1)
         self.assertEqual(dashboard.warehouse_name, "East Distribution Center")
-        self.assertEqual(len(dashboard.kpis), 6)
+        self.assertEqual(len(dashboard.kpis), 13)
         self.assertEqual(dashboard.kpis[0].status, "Green")
         self.assertEqual(dashboard.kpis[1].value, 2.0)
+        self.assertEqual(dashboard.kpis[3].value, 99.0)
+        self.assertEqual(dashboard.kpis[4].value, 20.0)
+        self.assertEqual(dashboard.kpis[6].value, 20.0)
+        self.assertEqual(dashboard.kpis[7].value, 1.0)
+        self.assertEqual(dashboard.kpis[12].value, 109.67)
+        self.assertEqual(
+            {kpi.kpi_name for kpi in dashboard.kpis},
+            {
+                "Total Inventory Value",
+                "Stock-Out Rate",
+                "Items Below Reorder Point",
+                "Inventory Accuracy",
+                "Days of Supply",
+                "On-Time Delivery Rate",
+                "Cost Per Shipment",
+                "Cancellation Rate",
+                "Average Transit Days",
+                "Average Units Per Hour",
+                "Error Rate",
+                "Cost Per Unit Processed",
+                "Labor Efficiency Index",
+            },
+        )
         self.assertTrue(all(call[1]["wh_id"] == 1 for call in db.calls))
 
     def test_inventory_and_shipment_mapping(self):

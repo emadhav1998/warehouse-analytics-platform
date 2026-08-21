@@ -8,25 +8,43 @@
 // === INVENTORY KPIs ===
 
 Total Inventory Value (Cost) | USD =
-SUMX(
-    fact_inventory,
-    fact_inventory[inventory_value_at_cost]
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    SUM(fact_inventory[inventory_value_at_cost]),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate)
 )
 // Format: $#,##0.00
 
 Total Inventory Value (Retail) | USD =
-SUMX(
-    fact_inventory,
-    fact_inventory[inventory_value_at_retail]
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    SUM(fact_inventory[inventory_value_at_retail]),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate)
 )
 // Format: $#,##0.00
 
 Total Quantity On Hand | Units =
-SUM(fact_inventory[quantity_on_hand])
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    SUM(fact_inventory[quantity_on_hand]),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate)
+)
 // Format: #,##0
 
 Total Quantity Available | Units =
-SUM(fact_inventory[quantity_available])
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    SUM(fact_inventory[quantity_available]),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate)
+)
 // Format: #,##0
 
 Inventory Utilization | % =
@@ -38,34 +56,51 @@ DIVIDE(
 // Format: 0.00
 
 Stock Out Rate | % =
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+VAR _StockOutItems =
+    CALCULATE(
+        COUNTROWS(fact_inventory),
+        KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate),
+        fact_inventory[stock_status] = "Out of Stock"
+    )
+VAR _TotalItems =
+    CALCULATE(
+        COUNTROWS(fact_inventory),
+        KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate)
+    )
+RETURN
 DIVIDE(
-    COUNTROWS(
-        FILTER(
-            fact_inventory,
-            fact_inventory[stock_status] = "Out of Stock"
-        )
-    ),
-    COUNTROWS(fact_inventory),
+    _StockOutItems,
+    _TotalItems,
     0
 ) * 100
 // Format: 0.00
 
 Items Below Reorder Point | Items =
-COUNTROWS(
-    FILTER(
-        fact_inventory,
-        fact_inventory[needs_reorder] = 1
-    )
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    COUNTROWS(fact_inventory),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate),
+    fact_inventory[needs_reorder] = 1
 )
 // Format: #,##0
 
 Inventory Accuracy | % =
-VAR _TotalItems =
-    COUNTROWS(fact_inventory)
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+VAR _LatestInventory =
+    FILTER(
+        fact_inventory,
+        fact_inventory[date_key] = _LatestSnapshotDate
+    )
+VAR _TotalItems = COUNTROWS(_LatestInventory)
 VAR _AccurateItems =
     COUNTROWS(
         FILTER(
-            fact_inventory,
+            _LatestInventory,
             fact_inventory[quantity_on_hand]
                 = fact_inventory[quantity_reserved]
                     + fact_inventory[quantity_available]
@@ -86,11 +121,13 @@ RETURN
 // Format: #,##0.0
 
 Expiring Items (30 Days) | Items =
-COUNTROWS(
-    FILTER(
-        fact_inventory,
-        fact_inventory[expiring_within_30_days] = 1
-    )
+VAR _LatestSnapshotDate =
+    MAX(fact_inventory[date_key])
+RETURN
+CALCULATE(
+    COUNTROWS(fact_inventory),
+    KEEPFILTERS(fact_inventory[date_key] = _LatestSnapshotDate),
+    fact_inventory[expiring_within_30_days] = 1
 )
 // Format: #,##0
 

@@ -24,12 +24,14 @@ DIVIDE([Total Units Processed | Units], [Total Labor Hours | Hours], 0)
 // Format: #,##0.0
 
 Labor Efficiency Index | % =
-VAR _AvgProductivity =
-    AVERAGE(fact_labor[avg_units_per_hour])
 // Industry benchmark in units per hour.
 VAR _BenchmarkProductivity = 75
 RETURN
-    DIVIDE(_AvgProductivity, _BenchmarkProductivity, 0) * 100
+    DIVIDE(
+        [Average Units Per Hour | Units/Hour],
+        _BenchmarkProductivity,
+        0
+    ) * 100
 // Format: 0.00
 
 Error Rate | % =

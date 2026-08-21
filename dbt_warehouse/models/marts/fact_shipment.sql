@@ -60,7 +60,8 @@ final as (
 
         -- ── Derived lateness flag ─────────────────────────────────────────
         case
-            when s.actual_transit_days > s.expected_transit_days then 1
+            when s.status = 'Delivered'
+             and s.actual_transit_days > s.expected_transit_days then 1
             else 0
         end                                     as is_late,
 

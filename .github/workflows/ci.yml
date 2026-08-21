@@ -24,9 +24,9 @@ jobs:
       DBT_USER: ${{ secrets.DBT_USER }}
       DBT_PASSWORD: ${{ secrets.DBT_PASSWORD }}
       DBT_DRIVER: ODBC Driver 18 for SQL Server
-      DBT_WINDOWS_LOGIN: "false"
-      DBT_ENCRYPT: "true"
-      DBT_TRUST_CERT: "false"
+      DBT_WINDOWS_LOGIN: "False"
+      DBT_ENCRYPT: "True"
+      DBT_TRUST_CERT: "False"
       WAREHOUSE_DB_CONNECTION_STRING: ${{ secrets.WAREHOUSE_DB_CONNECTION_STRING }}
 
     steps:

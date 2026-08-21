@@ -13,7 +13,13 @@ COUNTROWS(fact_shipment)
 
 On-Time Delivery Rate | % =
 DIVIDE(
-    COUNTROWS(FILTER(fact_shipment, fact_shipment[delivery_performance] = "On Time")),
+    COUNTROWS(
+        FILTER(
+            fact_shipment,
+            fact_shipment[status] = "Delivered"
+                && fact_shipment[delivery_performance] = "On Time"
+        )
+    ),
     COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Delivered")),
     0
 ) * 100
@@ -24,7 +30,10 @@ COUNTROWS(FILTER(fact_shipment, fact_shipment[is_late] = 1))
 // Format: #,##0
 
 Average Transit Days | Days =
-AVERAGE(fact_shipment[actual_transit_days])
+CALCULATE(
+    AVERAGE(fact_shipment[actual_transit_days]),
+    fact_shipment[status] = "Delivered"
+)
 // Format: #,##0.0
 
 Total Shipping Cost | USD =

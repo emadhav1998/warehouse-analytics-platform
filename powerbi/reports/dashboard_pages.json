@@ -6,6 +6,13 @@
   "globalSettings": {
     "dateTable": "dim_date",
     "dateColumn": "dim_date[date_key]",
+    "defaultDateFilter": {
+      "type": "relative",
+      "period": "month",
+      "count": 1,
+      "includeCurrentPeriod": true,
+      "description": "Matches the KPI API rolling one-month shipment and labor window"
+    },
     "measureHomeTable": "_Measures",
     "syncSlicers": ["Date Range", "Warehouse", "Category"],
     "layoutStandards": {
@@ -58,7 +65,7 @@
       "pageType": "standard",
       "visuals": [
         { "id": "title", "type": "textBox", "title": "WAREHOUSE ANALYTICS", "position": [24, 18, 330, 44] },
-        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "position": [690, 14, 250, 54] },
+        { "id": "date_range", "type": "slicer", "title": "Date Range", "field": "dim_date[date_key]", "style": "between", "usesGlobalDefault": true, "position": [690, 14, 250, 54] },
         { "id": "warehouse", "type": "slicer", "title": "Warehouse", "field": "dim_warehouse[warehouse_name]", "style": "dropdown", "search": true, "position": [952, 14, 220, 54] },
         { "id": "category", "type": "slicer", "title": "Category", "field": "dim_product[category]", "style": "dropdown", "search": true, "position": [1184, 14, 232, 54] },
         {

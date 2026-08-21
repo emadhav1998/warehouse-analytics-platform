@@ -11,9 +11,9 @@ warehouse_analytics:
       database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
       schema: staging
       # Windows-integrated auth — no username/password needed locally
-      windows_login: "{{ env_var('DBT_WINDOWS_LOGIN', 'true') | as_bool }}"
-      encrypt: "{{ env_var('DBT_ENCRYPT', 'false') | as_bool }}"
-      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'true') | as_bool }}"
+      windows_login: "{{ env_var('DBT_WINDOWS_LOGIN', 'True') | as_bool }}"
+      encrypt: "{{ env_var('DBT_ENCRYPT', 'False') | as_bool }}"
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'True') | as_bool }}"
       # Optional SQL login override via environment variables
       user: "{{ env_var('DBT_USER', '') }}"
       password: "{{ env_var('DBT_PASSWORD', '') }}"

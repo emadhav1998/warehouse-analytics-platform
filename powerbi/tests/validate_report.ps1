@@ -13,6 +13,7 @@ $reportPath = Join-Path $powerBiRoot "reports\dashboard_pages.json"
 $themePath = Join-Path $powerBiRoot "theme\warehouse_analytics_theme.json"
 $refreshPath = Join-Path $powerBiRoot "config\refresh_schedule.json"
 $optimizationPath = Join-Path $powerBiRoot "config\model_optimization.json"
+$apiKpiPath = Join-Path $repoRoot "backend\app\routers\kpis.py"
 
 $report = Get-Content -Raw -LiteralPath $reportPath | ConvertFrom-Json
 $theme = Get-Content -Raw -LiteralPath $themePath | ConvertFrom-Json
@@ -27,6 +28,9 @@ $visiblePages = @($report.pages | Where-Object { -not $_.hidden -and $_.pageType
 $visiblePageNames = @($visiblePages.name)
 $navigation = $report.globalSettings.navigationPane
 $navigationDestinations = @($navigation.buttons.destination)
+Assert-True ($report.globalSettings.defaultDateFilter.type -eq "relative") "Default date filter must be relative."
+Assert-True ($report.globalSettings.defaultDateFilter.period -eq "month") "Default KPI window must use months."
+Assert-True ($report.globalSettings.defaultDateFilter.count -eq 1) "Default KPI window must match the API's rolling month."
 Assert-True ($report.canvas.width -eq ($report.canvas.contentWidth + $report.globalSettings.layoutStandards.navigationWidth)) "Canvas width must reserve space for the navigation pane."
 Assert-True ($navigation.contentOffset[0] -eq $report.globalSettings.layoutStandards.navigationWidth) "Content offset must match navigation width."
 Assert-True ($navigationDestinations.Count -eq $visiblePageNames.Count) "Navigation must contain one button per visible standard page."
@@ -90,11 +94,41 @@ foreach ($aggregation in $optimization.aggregations) {
     }
 }
 
+$measureText = ""
+Get-ChildItem -LiteralPath (Join-Path $powerBiRoot "measures") -Filter "*.dax" | ForEach-Object {
+    $measureText += Get-Content -Raw -LiteralPath $_.FullName
+}
+$apiKpiText = Get-Content -Raw -LiteralPath $apiKpiPath
+$coreKpiContracts = @(
+    @{ Api = "Total Inventory Value"; Dax = "Total Inventory Value (Cost) | USD" },
+    @{ Api = "Stock-Out Rate"; Dax = "Stock Out Rate | %" },
+    @{ Api = "Items Below Reorder Point"; Dax = "Items Below Reorder Point | Items" },
+    @{ Api = "Inventory Accuracy"; Dax = "Inventory Accuracy | %" },
+    @{ Api = "Days of Supply"; Dax = "Days of Supply | Days" },
+    @{ Api = "On-Time Delivery Rate"; Dax = "On-Time Delivery Rate | %" },
+    @{ Api = "Cost Per Shipment"; Dax = "Cost Per Shipment | USD/Shipment" },
+    @{ Api = "Cancellation Rate"; Dax = "Cancellation Rate | %" },
+    @{ Api = "Average Transit Days"; Dax = "Average Transit Days | Days" },
+    @{ Api = "Average Units Per Hour"; Dax = "Average Units Per Hour | Units/Hour" },
+    @{ Api = "Error Rate"; Dax = "Error Rate | %" },
+    @{ Api = "Cost Per Unit Processed"; Dax = "Cost Per Unit Processed | USD/Unit" },
+    @{ Api = "Labor Efficiency Index"; Dax = "Labor Efficiency Index | %" }
+)
+foreach ($contract in $coreKpiContracts) {
+    Assert-True ($apiKpiText.Contains("`"$($contract.Api)`"")) "API KPI '$($contract.Api)' is missing."
+    Assert-True ($measureText.Contains("$($contract.Dax) =")) "DAX KPI '$($contract.Dax)' is missing."
+}
+Assert-True ($measureText.Contains("KEEPFILTERS(fact_inventory[date_key]")) "Inventory measures must use the latest visible snapshot."
+Assert-True ($measureText.Contains('fact_shipment[status] = "Delivered"')) "Shipment DAX must restrict OTD and transit KPIs to delivered shipments."
+Assert-True ($apiKpiText.Contains("status = 'Delivered' AND delivery_performance = 'On Time'")) "API OTD numerator must contain only delivered shipments."
+
 Write-Output "PASS: theme JSON and formatting defaults"
 Write-Output "PASS: navigation covers $($visiblePages.Count) visible pages"
 Write-Output "PASS: slicer and cross-filter configuration"
+Write-Output "PASS: default date filter matches the KPI API window"
 Write-Output "PASS: $($drillTargets.Count) drill-through references"
 Write-Output "PASS: $($report.bookmarks.Count) bookmarks and button targets"
 Write-Output "PASS: $($policyTables.Count) incremental refresh policies"
 Write-Output "PASS: removed-column reference safety"
 Write-Output "PASS: $($optimization.aggregations.Count) aggregation models and mappings"
+Write-Output "PASS: $($coreKpiContracts.Count) API-to-Power BI KPI contracts"
