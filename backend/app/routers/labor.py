@@ -24,6 +24,7 @@ LABOR_PRODUCTIVITY_QUERY = text("""
       AND (:department IS NULL OR fl.department = :department)
     GROUP BY fl.department, fl.activity_type
     ORDER BY avg_uph DESC
+    OPTION (RECOMPILE)
 """)
 
 

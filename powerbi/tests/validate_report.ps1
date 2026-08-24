@@ -83,6 +83,8 @@ foreach ($tableProperty in $optimization.removeFromReportModel.PSObject.Properti
 }
 
 foreach ($aggregation in $optimization.aggregations) {
+    Assert-True ($aggregation.storageMode -eq "Import") "Aggregation '$($aggregation.table)' must use Import mode."
+    Assert-True ($aggregation.precedence -gt 0) "Aggregation '$($aggregation.table)' must have positive precedence."
     $sqlPath = Join-Path $repoRoot "dbt_warehouse\models\marts\aggregations\$($aggregation.table).sql"
     Assert-True (Test-Path -LiteralPath $sqlPath) "Aggregation model '$($aggregation.table)' is missing."
     $sql = Get-Content -Raw -LiteralPath $sqlPath
@@ -93,6 +95,8 @@ foreach ($aggregation in $optimization.aggregations) {
         Assert-True ($sql -match [regex]::Escape($mapping.Name)) "Aggregation '$($aggregation.table)' does not expose mapped column '$($mapping.Name)'."
     }
 }
+$aggregationPrecedence = @($optimization.aggregations.precedence)
+Assert-True (($aggregationPrecedence | Sort-Object -Unique).Count -eq $aggregationPrecedence.Count) "Aggregation precedence values must be unique."
 
 $measureText = ""
 Get-ChildItem -LiteralPath (Join-Path $powerBiRoot "measures") -Filter "*.dax" | ForEach-Object {

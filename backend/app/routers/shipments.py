@@ -30,6 +30,7 @@ def get_shipment_performance(
           AND (:wh_id IS NULL OR warehouse_id = :wh_id)
         GROUP BY carrier
         ORDER BY total_shipments DESC
+        OPTION (RECOMPILE)
     """)
     rows = db.execute(
         query,
@@ -42,4 +43,3 @@ def get_shipment_performance(
         )
         for row in rows
     ]
-

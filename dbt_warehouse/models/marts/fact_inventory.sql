@@ -1,6 +1,35 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='inventory_fact_key',
+        incremental_strategy='merge',
+        on_schema_change='sync_all_columns',
+        post_hook="{{ ensure_nonclustered_index(
+            this,
+            'IX_fact_inventory_date_warehouse',
+            ['date_key', 'warehouse_id'],
+            ['warehouse_key', 'product_key', 'quantity_on_hand',
+             'quantity_reserved', 'quantity_available', 'stock_status',
+             'needs_reorder', 'inventory_value_at_cost']
+        ) }}"
+    )
+}}
+
 with inventory as (
 
     select * from {{ ref('int_inventory_daily_snapshot') }}
+
+    {% if is_incremental() %}
+    -- Reprocess a short lookback so late-arriving same-day snapshots are merged.
+    where snapshot_date >= dateadd(
+        day,
+        -2,
+        (
+            select coalesce(max(date_key), cast('19000101' as date))
+            from {{ this }}
+        )
+    )
+    {% endif %}
 
 ),
 

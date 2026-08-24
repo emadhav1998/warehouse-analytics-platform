@@ -49,6 +49,7 @@ def get_inventory_summary(
           AND (:wh_id IS NULL OR fi.warehouse_id = :wh_id)
         GROUP BY dw.warehouse_name
         ORDER BY total_value DESC
+        OPTION (RECOMPILE)
     """)
     rows = db.execute(query, {"wh_id": warehouse_id}).mappings().all()
     return [InventorySummary(**row) for row in rows]
@@ -80,6 +81,7 @@ def get_inventory_alerts(
           AND (:wh_id IS NULL OR fi.warehouse_id = :wh_id)
           AND (fi.needs_reorder = 1 OR fi.stock_status = 'Out of Stock')
         ORDER BY fi.quantity_available ASC, dp.sku ASC
+        OPTION (RECOMPILE)
     """)
     rows = db.execute(query, {"wh_id": warehouse_id, "limit": limit}).mappings().all()
     return [InventoryAlert(**row) for row in rows]

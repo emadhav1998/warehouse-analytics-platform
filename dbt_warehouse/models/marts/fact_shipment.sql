@@ -1,3 +1,14 @@
+{{
+    config(
+        post_hook="{{ ensure_nonclustered_index(
+            this,
+            'IX_fact_shipment_date_warehouse_status',
+            ['date_key', 'warehouse_id', 'status', 'delivery_performance'],
+            ['carrier', 'shipping_cost', 'actual_transit_days']
+        ) }}"
+    )
+}}
+
 with shipments as (
 
     select * from {{ ref('stg_shipments') }}

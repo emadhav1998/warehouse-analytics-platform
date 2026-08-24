@@ -6,7 +6,12 @@
     "discourageImplicitMeasures": true,
     "relationshipCrossFilterDirection": "Single",
     "assumeReferentialIntegrity": false,
-    "hideTechnicalColumns": true
+    "hideTechnicalColumns": true,
+    "enableAggregationTables": true,
+    "queryReduction": {
+      "slicerApplyButton": true,
+      "filterApplyButton": true
+    }
   },
   "removeFromReportModel": {
     "fact_inventory": ["inventory_fact_key", "warehouse_id", "product_id", "warehouse_name", "category", "sku"],
@@ -28,6 +33,8 @@
     {
       "table": "agg_inventory_monthly",
       "detailTable": "fact_inventory",
+      "storageMode": "Import",
+      "precedence": 30,
       "grain": ["month_start", "warehouse_key", "product_key"],
       "mappings": {
         "inventory_records": "Count rows",
@@ -41,6 +48,8 @@
     {
       "table": "agg_shipment_monthly",
       "detailTable": "fact_shipment",
+      "storageMode": "Import",
+      "precedence": 20,
       "grain": ["month_start", "warehouse_key", "shipment_type", "carrier"],
       "mappings": {
         "shipment_count": "Count rows",
@@ -52,6 +61,8 @@
     {
       "table": "agg_labor_monthly",
       "detailTable": "fact_labor",
+      "storageMode": "Import",
+      "precedence": 10,
       "grain": ["month_start", "warehouse_key", "employee_key", "activity_type"],
       "mappings": {
         "labor_records": "Count rows",
@@ -64,4 +75,3 @@
     }
   ]
 }
-

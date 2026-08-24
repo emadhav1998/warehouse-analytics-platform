@@ -1,3 +1,17 @@
+{{
+    config(
+        post_hook="{{ ensure_nonclustered_index(
+            this,
+            'IX_fact_labor_date_warehouse_employee',
+            ['date_key', 'warehouse_id', 'employee_id'],
+            [
+                'department', 'activity_type', 'total_hours', 'total_units',
+                'total_errors', 'labor_cost'
+            ]
+        ) }}"
+    )
+}}
+
 with labor as (
 
     select * from {{ ref('int_labor_productivity') }}

@@ -46,6 +46,7 @@ INVENTORY_KPI_QUERY = text("""
     CROSS JOIN latest_date ld
     WHERE fi.date_key = ld.date_key
       AND (:wh_id IS NULL OR fi.warehouse_id = :wh_id)
+    OPTION (RECOMPILE)
 """)
 
 SHIPMENT_KPI_QUERY = text("""
@@ -67,6 +68,7 @@ SHIPMENT_KPI_QUERY = text("""
     FROM mart.fact_shipment
     WHERE date_key >= DATEADD(MONTH, -1, CAST(GETDATE() AS date))
       AND (:wh_id IS NULL OR warehouse_id = :wh_id)
+    OPTION (RECOMPILE)
 """)
 
 LABOR_KPI_QUERY = text("""
@@ -78,6 +80,7 @@ LABOR_KPI_QUERY = text("""
     FROM mart.fact_labor
     WHERE date_key >= DATEADD(MONTH, -1, CAST(GETDATE() AS date))
       AND (:wh_id IS NULL OR warehouse_id = :wh_id)
+    OPTION (RECOMPILE)
 """)
 
 
