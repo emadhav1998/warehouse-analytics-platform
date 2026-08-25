@@ -18,15 +18,29 @@ warehouse_analytics:
       user: "{{ env_var('DBT_USER', '') }}"
       password: "{{ env_var('DBT_PASSWORD', '') }}"
 
+    staging:
+      type: sqlserver
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 18 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER') }}"
+      port: "{{ env_var('DBT_PORT', '1433') | int }}"
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
+      schema: staging
+      windows_login: false
+      user: "{{ env_var('DBT_USER') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
+      encrypt: true
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'False') | as_bool }}"
+
     # ── Production (Azure SQL Database) ─────────────────────────────────────
     prod:
       type: sqlserver
-      driver: 'ODBC Driver 17 for SQL Server'
-      server: "{{ env_var('PROD_SQL_SERVER') }}"
-      port: 1433
-      database: WarehouseAnalyticsDB
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 18 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER') }}"
+      port: "{{ env_var('DBT_PORT', '1433') | int }}"
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
       schema: staging
-      user: "{{ env_var('PROD_DBT_USER') }}"
-      password: "{{ env_var('PROD_DBT_PASSWORD') }}"
+      windows_login: false
+      user: "{{ env_var('DBT_USER') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
       encrypt: true
-      trust_cert: false
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'False') | as_bool }}"

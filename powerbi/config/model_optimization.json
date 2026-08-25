@@ -18,7 +18,8 @@
     "fact_shipment": ["shipment_fact_key", "warehouse_id", "transit_efficiency_ratio", "total_line_value"],
     "fact_labor": ["labor_fact_key", "warehouse_id", "employee_name", "department", "shift", "hourly_rate", "error_rate_pct"],
     "dim_warehouse": ["address"],
-    "dim_employee": ["email"]
+    "dim_employee": ["email"],
+    "security_user_warehouse": ["granted_at", "granted_by"]
   },
   "hideButRetain": {
     "fact_inventory": ["warehouse_key", "product_key", "date_key"],
@@ -27,7 +28,8 @@
     "dim_date": ["day_of_year", "fiscal_month"],
     "dim_warehouse": ["warehouse_key"],
     "dim_product": ["product_key"],
-    "dim_employee": ["employee_key"]
+    "dim_employee": ["employee_key"],
+    "security_user_warehouse": ["user_email", "warehouse_id", "is_active"]
   },
   "aggregations": [
     {

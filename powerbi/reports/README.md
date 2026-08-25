@@ -23,6 +23,17 @@ visual interactions, and conditional-formatting rules.
     Scorecard/Trend toggles preserve slicer selections; capture only the display state of the named bookmark group.
 11. Hide the tooltip and Late Shipment Detail pages, then test drill-through with **Keep all filters** enabled.
 
+## Row-level security
+
+1. Import `mart.security_user_warehouse` as `security_user_warehouse`; do not create a relationship from it.
+2. Retain and hide `user_email`, `warehouse_id`, and `is_active`. Do not expose access mappings in report visuals.
+3. Create the `WarehouseAccess` and `WarehouseAdministrator` roles described in `../rls/roles.json` and apply the
+   expressions from `../rls/warehouse_rls.dax` to `dim_warehouse`.
+4. Test `WarehouseAccess` with **View as > Other user** for a mapped user, an unmapped user, an inactive mapping, and a
+   user mapped to multiple warehouses. Unmapped and inactive users must see no warehouse data.
+5. In Power BI Service, assign restricted consumers as semantic-model Viewers. Admin, Member, and Contributor workspace
+   roles bypass RLS. Never assign a restricted consumer to the unrestricted role because Power BI combines roles with OR.
+
 ## Publishing and refresh
 
 - Apply the reusable page navigator from `dashboard_pages.json` to every visible page. The hidden drill-through page keeps

@@ -1,75 +1,35 @@
 // =============================================================================
-// File    : warehouse_rls.dax
-// Purpose : Row-Level Security (RLS) role definitions for the Warehouse
-//           Analytics Power BI report.
-//
-// How to apply in Power BI Desktop:
-//   1. Home → Manage Roles → Create / edit each role below
-//   2. Select the table and paste the DAX filter expression
-//   3. Save, then use "View As Roles" to test
-//
-// RLS Strategy:
-//   - Warehouse managers see only their own warehouse's data
-//   - Analysts see all warehouses (no filter)
-//   - Executive role sees all warehouses (no filter)
+// Dynamic warehouse row-level security roles
 // =============================================================================
 
+// Role: WarehouseAccess
+// Apply this expression to dim_warehouse.
+// security_user_warehouse is intentionally disconnected from the model.
+// Access is denied when the signed-in identity has no active mapping.
 
-// ── Role: WH-001 Northeast ────────────────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression:
-[warehouse_code] = "WH-001"
-
-
-// ── Role: WH-002 Southeast ────────────────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression:
-[warehouse_code] = "WH-002"
-
-
-// ── Role: WH-003 Midwest ──────────────────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression:
-[warehouse_code] = "WH-003"
-
-
-// ── Role: WH-004 Southwest ────────────────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression:
-[warehouse_code] = "WH-004"
+VAR _CurrentUser = LOWER(USERPRINCIPALNAME())
+VAR _CurrentWarehouse = dim_warehouse[warehouse_id]
+RETURN
+    COUNTROWS(
+        FILTER(
+            security_user_warehouse,
+            LOWER(security_user_warehouse[user_email]) = _CurrentUser
+                && security_user_warehouse[warehouse_id] = _CurrentWarehouse
+                && security_user_warehouse[is_active] = TRUE()
+        )
+    ) > 0
 
 
-// ── Role: WH-005 West ─────────────────────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression:
-[warehouse_code] = "WH-005"
+// Role: WarehouseAdministrator
+// Apply this expression to dim_warehouse. Assign only trusted administrators
+// and executives who are authorized to see every warehouse.
 
-
-// ── Role: Analyst (all warehouses) ───────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression (no restriction):
 TRUE()
 
 
-// ── Role: Executive (all warehouses) ─────────────────────────────────────────
-// Table: dim_warehouse
-// Filter expression (no restriction):
-TRUE()
-
-
-// =============================================================================
-// Dynamic RLS (optional alternative) — uses the signed-in user's email
-// to look up their warehouse assignment from a security mapping table.
-//
-// Requires a SecurityMapping table with columns:
-//   user_email   VARCHAR
-//   warehouse_code VARCHAR
-//
-// Table: dim_warehouse
-// Filter expression (dynamic):
-// [warehouse_code] IN
-//     CALCULATETABLE(
-//         VALUES(SecurityMapping[warehouse_code]),
-//         SecurityMapping[user_email] = USERPRINCIPALNAME()
-//     )
-// =============================================================================
+// Important Power BI Service behavior:
+// - Assign ordinary viewers only to WarehouseAccess.
+// - Do not assign the same viewer to WarehouseAdministrator because roles are
+//   combined with OR semantics and the unrestricted role would win.
+// - Workspace Admin, Member, and Contributor permissions bypass RLS. Consumers
+//   who must be restricted should have Viewer access through the semantic model.

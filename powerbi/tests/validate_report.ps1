@@ -14,15 +14,23 @@ $themePath = Join-Path $powerBiRoot "theme\warehouse_analytics_theme.json"
 $refreshPath = Join-Path $powerBiRoot "config\refresh_schedule.json"
 $optimizationPath = Join-Path $powerBiRoot "config\model_optimization.json"
 $apiKpiPath = Join-Path $repoRoot "backend\app\routers\kpis.py"
+$rlsPath = Join-Path $powerBiRoot "rls\warehouse_rls.dax"
+$rolesPath = Join-Path $powerBiRoot "rls\roles.json"
 
 $report = Get-Content -Raw -LiteralPath $reportPath | ConvertFrom-Json
 $theme = Get-Content -Raw -LiteralPath $themePath | ConvertFrom-Json
 $refresh = Get-Content -Raw -LiteralPath $refreshPath | ConvertFrom-Json
 $optimization = Get-Content -Raw -LiteralPath $optimizationPath | ConvertFrom-Json
+$rls = Get-Content -Raw -LiteralPath $rlsPath
+$roles = Get-Content -Raw -LiteralPath $rolesPath | ConvertFrom-Json
 
 Assert-True ($theme.name -eq "Warehouse Analytics 2.0") "Unexpected theme name."
 Assert-True ($theme.dataColors.Count -ge 8) "Theme must define at least eight data colors."
 Assert-True ($null -ne $theme.visualStyles.'*'.'*'.title) "Theme must define global visual titles."
+Assert-True ($roles.defaultBehavior -eq "deny") "RLS must deny access when no mapping exists."
+Assert-True ("WarehouseAccess" -in @($roles.roles.name)) "Restricted WarehouseAccess role is missing."
+Assert-True ($rls.Contains("USERPRINCIPALNAME()")) "Dynamic RLS must use the signed-in Power BI identity."
+Assert-True ($rls.Contains("security_user_warehouse[is_active] = TRUE()")) "Dynamic RLS must honor active mappings."
 
 $visiblePages = @($report.pages | Where-Object { -not $_.hidden -and $_.pageType -eq "standard" })
 $visiblePageNames = @($visiblePages.name)
@@ -127,6 +135,7 @@ Assert-True ($measureText.Contains('fact_shipment[status] = "Delivered"')) "Ship
 Assert-True ($apiKpiText.Contains("status = 'Delivered' AND delivery_performance = 'On Time'")) "API OTD numerator must contain only delivered shipments."
 
 Write-Output "PASS: theme JSON and formatting defaults"
+Write-Output "PASS: dynamic warehouse RLS is deny-by-default"
 Write-Output "PASS: navigation covers $($visiblePages.Count) visible pages"
 Write-Output "PASS: slicer and cross-filter configuration"
 Write-Output "PASS: default date filter matches the KPI API window"
