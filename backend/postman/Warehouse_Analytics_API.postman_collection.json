@@ -1,0 +1,61 @@
+{
+  "info": {
+    "_postman_id": "9f1735d8-4261-4b5d-97ea-warehouseanalytics",
+    "name": "Warehouse Analytics API",
+    "description": "Preconfigured read-only requests for Warehouse Analytics API v1. Start the API locally, then run this collection. Optional filter variables can be changed at collection level.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "noauth" },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Successful response', function () { pm.response.to.have.status(200); });",
+          "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'); });"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "warehouse_id", "value": "1", "type": "string" },
+    { "key": "days", "value": "30", "type": "string" },
+    { "key": "department", "value": "Fulfillment", "type": "string" },
+    { "key": "alert_limit", "value": "50", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Service",
+      "item": [
+        { "name": "Health Check", "request": { "method": "GET", "header": [], "description": "Checks API process health without querying SQL Server.", "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] } } },
+        { "name": "OpenAPI Document", "request": { "method": "GET", "header": [], "description": "Downloads the machine-readable OpenAPI schema.", "url": { "raw": "{{base_url}}/openapi.json", "host": ["{{base_url}}"], "path": ["openapi.json"] } } }
+      ]
+    },
+    {
+      "name": "KPIs",
+      "item": [
+        { "name": "KPI Dashboard - All Warehouses", "request": { "method": "GET", "header": [], "description": "Returns all 13 governed KPIs for the enterprise view.", "url": { "raw": "{{base_url}}/api/v1/kpis/dashboard", "host": ["{{base_url}}"], "path": ["api", "v1", "kpis", "dashboard"] } } },
+        { "name": "KPI Dashboard - Warehouse", "request": { "method": "GET", "header": [], "description": "Returns governed KPIs for one positive warehouse ID.", "url": { "raw": "{{base_url}}/api/v1/kpis/dashboard?warehouse_id={{warehouse_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "kpis", "dashboard"], "query": [{ "key": "warehouse_id", "value": "{{warehouse_id}}", "description": "Positive warehouse ID" }] } } },
+        { "name": "KPI Definitions", "request": { "method": "GET", "header": [], "description": "Returns formulas, targets, frequencies, and owners.", "url": { "raw": "{{base_url}}/api/v1/kpis/definitions", "host": ["{{base_url}}"], "path": ["api", "v1", "kpis", "definitions"] } } }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        { "name": "Active Warehouses", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/inventory/warehouses", "host": ["{{base_url}}"], "path": ["api", "v1", "inventory", "warehouses"] } } },
+        { "name": "Inventory Summary", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/inventory/summary?warehouse_id={{warehouse_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "inventory", "summary"], "query": [{ "key": "warehouse_id", "value": "{{warehouse_id}}", "description": "Positive warehouse ID; disable to return every warehouse" }] } } },
+        { "name": "Inventory Alerts", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/inventory/alerts?warehouse_id={{warehouse_id}}&limit={{alert_limit}}", "host": ["{{base_url}}"], "path": ["api", "v1", "inventory", "alerts"], "query": [{ "key": "warehouse_id", "value": "{{warehouse_id}}" }, { "key": "limit", "value": "{{alert_limit}}", "description": "1 through 200" }] } } }
+      ]
+    },
+    {
+      "name": "Operations",
+      "item": [
+        { "name": "Shipment Performance", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/shipments/performance?days={{days}}&warehouse_id={{warehouse_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "shipments", "performance"], "query": [{ "key": "days", "value": "{{days}}", "description": "1 through 365" }, { "key": "warehouse_id", "value": "{{warehouse_id}}" }] } } },
+        { "name": "Labor Productivity", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/labor/productivity?warehouse_id={{warehouse_id}}&department={{department}}", "host": ["{{base_url}}"], "path": ["api", "v1", "labor", "productivity"], "query": [{ "key": "warehouse_id", "value": "{{warehouse_id}}" }, { "key": "department", "value": "{{department}}", "description": "Exact department name" }] } } },
+        { "name": "Data Quality Report", "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/validation/data-quality", "host": ["{{base_url}}"], "path": ["api", "v1", "validation", "data-quality"] } } }
+      ]
+    }
+  ]
+}

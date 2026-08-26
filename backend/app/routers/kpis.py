@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api_docs import documented_responses
 from app.database import get_db
 from app.schemas.kpi_schema import KPIDashboard, KPIDefinition, KPIValue
 from app.services.kpi_catalog import KPI_DEFINITIONS
@@ -96,9 +97,21 @@ def _rag_status(value: float, target: float | None, lower_is_better: bool = Fals
     return "Yellow" if value >= target * 0.9 else "Red"
 
 
-@router.get("/dashboard", response_model=KPIDashboard)
+@router.get(
+    "/dashboard",
+    response_model=KPIDashboard,
+    summary="Get the governed KPI dashboard",
+    description="Returns 13 standardized KPIs. Inventory uses the latest available snapshot; shipment and labor measures use the trailing 30 days.",
+    response_description="Current KPI values and RAG statuses.",
+    operation_id="get_kpi_dashboard",
+    responses=documented_responses(
+        "Current KPI values and RAG statuses.",
+        {"warehouse_id": 1, "warehouse_name": "Atlanta Distribution Center", "kpis": [{"kpi_name": "On-Time Delivery Rate", "value": 96.25, "unit": "%", "target": 95.0, "status": "Green", "as_of_date": "2026-08-26"}]},
+        validation=True,
+    ),
+)
 def get_kpi_dashboard(
-    warehouse_id: int | None = Query(default=None, gt=0, description="Filter by warehouse"),
+    warehouse_id: int | None = Query(default=None, gt=0, description="Positive warehouse ID; omit for the enterprise view.", examples=[1]),
     db: Session = Depends(get_db),
 ) -> KPIDashboard:
     params = {"wh_id": warehouse_id}
@@ -171,6 +184,14 @@ def get_kpi_dashboard(
     )
 
 
-@router.get("/definitions", response_model=list[KPIDefinition])
+@router.get(
+    "/definitions",
+    response_model=list[KPIDefinition],
+    summary="List governed KPI definitions",
+    description="Returns the KPI catalog used by Power BI, the API, and the governance portal.",
+    response_description="Canonical formulas, targets, owners, and refresh frequencies.",
+    operation_id="list_kpi_definitions",
+    responses=documented_responses("Canonical KPI definitions.", [{"kpi_name": "Stock-Out Rate", "domain": "Inventory", "description": "Share of inventory records that are out of stock.", "formula": "COUNT(Out of Stock) / COUNT(All Items) × 100", "unit": "%", "target": 3.0, "frequency": "Daily", "owner": "Inventory Manager"}], database=False),
+)
 def get_kpi_definitions() -> list[KPIDefinition]:
     return [KPIDefinition(**definition) for definition in KPI_DEFINITIONS]

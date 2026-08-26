@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api_docs import documented_responses
 from app.database import get_db
 from app.schemas.validation_schema import DataQualityCheck, DataQualityReport
 
@@ -47,7 +48,15 @@ CHECK_LABELS = {
 }
 
 
-@router.get("/data-quality", response_model=DataQualityReport)
+@router.get(
+    "/data-quality",
+    response_model=DataQualityReport,
+    summary="Run mart data-quality checks",
+    description="Runs six read-only integrity and range checks against inventory, shipment, and labor marts.",
+    response_description="Overall result plus failed-row counts for every check.",
+    operation_id="get_data_quality_report",
+    responses=documented_responses("Current data-quality results.", {"status": "Passed", "checked_at": "2026-08-26T14:30:00Z", "checks": [{"check_name": "Negative inventory quantities", "failed_rows": 0, "status": "Passed"}]}),
+)
 def get_data_quality_report(db: Session = Depends(get_db)) -> DataQualityReport:
     result = db.execute(DATA_QUALITY_QUERY).mappings().one()
     checks = [
@@ -63,4 +72,3 @@ def get_data_quality_report(db: Session = Depends(get_db)) -> DataQualityReport:
         checked_at=datetime.now(timezone.utc),
         checks=checks,
     )
-

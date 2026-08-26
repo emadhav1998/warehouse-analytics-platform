@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api_docs import documented_responses
 from app.database import get_db
 from app.schemas.labor_schema import LaborProductivity
 
@@ -28,14 +29,24 @@ LABOR_PRODUCTIVITY_QUERY = text("""
 """)
 
 
-@router.get("/productivity", response_model=list[LaborProductivity])
+@router.get(
+    "/productivity",
+    response_model=list[LaborProductivity],
+    summary="Analyze labor productivity",
+    description="Aggregates the trailing month of labor activity by department and activity type.",
+    response_description="Labor productivity and cost metrics.",
+    operation_id="get_labor_productivity",
+    responses=documented_responses("Labor productivity metrics.", [{"department": "Fulfillment", "activity_type": "Picking", "headcount": 24, "total_hours": 960.5, "total_units": 82450, "avg_uph": 85.84, "total_errors": 310, "total_cost": 22187.5}], validation=True),
+)
 def get_labor_productivity(
-    warehouse_id: int | None = Query(default=None, gt=0),
+    warehouse_id: int | None = Query(default=None, gt=0, description="Positive warehouse ID; omit for all warehouses.", examples=[1]),
     department: str | None = Query(
         default=None,
         min_length=1,
         max_length=100,
         pattern=r"^[A-Za-z0-9 &()/.-]+$",
+        description="Exact department name (1–100 allowed characters).",
+        examples=["Fulfillment"],
     ),
     db: Session = Depends(get_db),
 ) -> list[LaborProductivity]:

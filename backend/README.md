@@ -24,7 +24,15 @@ in `.env` for other environments. Do not commit `.env`.
 - `GET /api/v1/labor/productivity?warehouse_id=1&department=Picking`
 - `GET /api/v1/validation/data-quality`
 
-Swagger UI is available at `/docs` while the service is running.
+Interactive Swagger UI is available at `/docs`, ReDoc at `/redoc`, and the raw
+OpenAPI 3 document at `/openapi.json` while the service is running. Every
+operation documents parameter constraints, success payloads, validation errors,
+and database availability errors.
+
+Import `postman/Warehouse_Analytics_API.postman_collection.json` into Postman to
+run all preconfigured requests. Set the collection-level `base_url` and filter
+variables as needed. The API is currently read-only and intentionally uses no
+authentication; protect it with an API gateway before exposing it publicly.
 
 ## Tests
 
@@ -35,7 +43,14 @@ Install development dependencies and run pytest:
 ..\.venv\Scripts\python.exe -m pytest
 ```
 
-Database exceptions are returned as a structured HTTP 503 response without exposing connection details.
+Database exceptions return HTTP `503` without exposing connection details:
+
+```json
+{"error":{"code":"database_unavailable","message":"The analytics database is temporarily unavailable."}}
+```
+
+FastAPI parameter validation errors return HTTP `422` with a `detail` array that
+identifies the invalid query parameter and violated constraint.
 
 ## Docker
 

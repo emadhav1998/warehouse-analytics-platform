@@ -3,15 +3,42 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.api_docs import documented_responses
 from app.config import settings
 from app.routers import inventory, kpis, labor, shipments, validation
-from app.schemas.error_schema import ErrorDetail, ErrorResponse
+from app.schemas.error_schema import ErrorDetail, ErrorResponse, HealthResponse
 
+
+DESCRIPTION = """
+Warehouse Operations Analytics API exposes governed inventory, shipment, labor,
+and data-quality metrics from the SQL Server analytics mart.
+
+## Conventions
+
+* All routes are read-only and return JSON.
+* Monetary values are expressed in USD unless the response says otherwise.
+* KPI dashboard calculations use the latest inventory snapshot and a rolling
+  30-day window for shipment and labor metrics.
+* Invalid parameters return `422`; an unavailable analytics database returns
+  `503` with a stable machine-readable error code.
+"""
+
+TAGS_METADATA = [
+    {"name": "Health", "description": "API process readiness."},
+    {"name": "KPIs", "description": "Governed KPI values and business definitions."},
+    {"name": "Inventory", "description": "Warehouse inventory summaries and replenishment alerts."},
+    {"name": "Shipments", "description": "Delivered-shipment carrier performance."},
+    {"name": "Labor", "description": "Recent labor productivity by department and activity."},
+    {"name": "Validation", "description": "Read-only analytics-mart data quality checks."},
+]
 
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
-    description="API for Warehouse Operations Analytics and KPI Governance",
+    description=DESCRIPTION,
+    openapi_tags=TAGS_METADATA,
+    contact={"name": "Data Analytics Team", "email": "analytics@company.com"},
+    license_info={"name": "Proprietary"},
     debug=settings.debug,
 )
 
@@ -48,6 +75,19 @@ async def database_exception_handler(
     )
 
 
-@app.get("/health", tags=["Health"])
+@app.get(
+    "/health",
+    tags=["Health"],
+    response_model=HealthResponse,
+    summary="Check API health",
+    description="Confirms that the FastAPI process is running. This check does not query SQL Server.",
+    response_description="The API process is healthy.",
+    operation_id="check_health",
+    responses=documented_responses(
+        "The API process is healthy.",
+        {"status": "healthy", "app": "Warehouse Analytics API"},
+        database=False,
+    ),
+)
 def health_check() -> dict[str, str]:
     return {"status": "healthy", "app": settings.app_name}
