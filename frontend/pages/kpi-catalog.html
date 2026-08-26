@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Warehouse Analytics KPI definitions, formulas, owners, and targets.">
+  <title>Warehouse Analytics | KPI Catalog</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="catalog" data-api-base="http://localhost:8000/api/v1">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <nav class="sidebar" aria-label="Primary navigation">
+    <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true">WH</span><span><strong>Warehouse</strong><small>Analytics</small></span></a>
+    <ul class="nav-links">
+      <li><a href="../index.html"><span aria-hidden="true">▦</span>Dashboard</a></li>
+      <li><a href="kpi-catalog.html" aria-current="page"><span aria-hidden="true">◎</span>KPI Catalog</a></li>
+      <li><a href="data-dictionary.html"><span aria-hidden="true">≡</span>Data Dictionary</a></li>
+    </ul>
+    <div class="sidebar-footer"><span class="live-dot" aria-hidden="true"></span>Governed metrics</div>
+  </nav>
+  <main class="content" id="main-content">
+    <header class="page-header"><div><p class="eyebrow">Governance library</p><h1>KPI Catalog</h1><p class="subtitle">Approved definitions, targets, ownership, and reporting cadence</p></div><div class="header-controls"><label class="filter-control" for="catalogDomain"><span>Domain</span><select id="catalogDomain"><option value="">All domains</option></select></label><label class="search-control" for="catalogSearch"><span>Search</span><input id="catalogSearch" type="search" placeholder="Search KPIs, owners, formulas…"></label></div></header>
+    <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+    <section class="catalog-grid" id="catalogGrid" aria-label="KPI definitions" aria-busy="true"></section>
+    <p id="catalogEmpty" class="empty-state" hidden>No KPIs match your search.</p>
+  </main>
+  <script src="../js/app.js" defer></script>
+</body>
+</html>

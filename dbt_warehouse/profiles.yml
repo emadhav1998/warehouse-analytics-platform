@@ -1,0 +1,46 @@
+warehouse_analytics:
+  target: dev
+  outputs:
+
+    # ── Local development (Windows auth) ────────────────────────────────────
+    dev:
+      type: sqlserver
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 17 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER', 'localhost') }}"
+      port: 1433
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
+      schema: staging
+      # Windows-integrated auth — no username/password needed locally
+      windows_login: "{{ env_var('DBT_WINDOWS_LOGIN', 'True') | as_bool }}"
+      encrypt: "{{ env_var('DBT_ENCRYPT', 'False') | as_bool }}"
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'True') | as_bool }}"
+      # Optional SQL login override via environment variables
+      user: "{{ env_var('DBT_USER', '') }}"
+      password: "{{ env_var('DBT_PASSWORD', '') }}"
+
+    staging:
+      type: sqlserver
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 18 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER') }}"
+      port: "{{ env_var('DBT_PORT', '1433') | int }}"
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
+      schema: staging
+      windows_login: false
+      user: "{{ env_var('DBT_USER') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
+      encrypt: true
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'False') | as_bool }}"
+
+    # ── Production (Azure SQL Database) ─────────────────────────────────────
+    prod:
+      type: sqlserver
+      driver: "{{ env_var('DBT_DRIVER', 'ODBC Driver 18 for SQL Server') }}"
+      server: "{{ env_var('DBT_SERVER') }}"
+      port: "{{ env_var('DBT_PORT', '1433') | int }}"
+      database: "{{ env_var('DBT_DATABASE', 'WarehouseAnalyticsDB') }}"
+      schema: staging
+      windows_login: false
+      user: "{{ env_var('DBT_USER') }}"
+      password: "{{ env_var('DBT_PASSWORD') }}"
+      encrypt: true
+      trust_cert: "{{ env_var('DBT_TRUST_CERT', 'False') | as_bool }}"

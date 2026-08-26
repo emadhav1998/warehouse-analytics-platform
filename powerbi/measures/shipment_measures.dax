@@ -1,0 +1,94 @@
+// =============================================================================
+// File    : shipment_measures.dax
+// Purpose : Shipment performance and time-intelligence KPI measures.
+// Home table: _Measures
+// Naming convention: KPI Name | Unit
+// =============================================================================
+
+// === SHIPMENT KPIs ===
+
+Total Shipments | Shipments =
+COUNTROWS(fact_shipment)
+// Format: #,##0
+
+On-Time Delivery Rate | % =
+DIVIDE(
+    COUNTROWS(
+        FILTER(
+            fact_shipment,
+            fact_shipment[status] = "Delivered"
+                && fact_shipment[delivery_performance] = "On Time"
+        )
+    ),
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Delivered")),
+    0
+) * 100
+// Format: 0.00
+
+Late Shipment Count | Shipments =
+COUNTROWS(FILTER(fact_shipment, fact_shipment[is_late] = 1))
+// Format: #,##0
+
+Average Transit Days | Days =
+CALCULATE(
+    AVERAGE(fact_shipment[actual_transit_days]),
+    fact_shipment[status] = "Delivered"
+)
+// Format: #,##0.0
+
+Total Shipping Cost | USD =
+SUM(fact_shipment[shipping_cost])
+// Format: $#,##0.00
+
+Cost Per Shipment | USD/Shipment =
+DIVIDE([Total Shipping Cost | USD], [Total Shipments | Shipments], 0)
+// Format: $#,##0.00
+
+Shipment Fill Rate | % =
+DIVIDE(
+    SUM(fact_shipment[total_quantity]),
+    SUM(fact_shipment[total_items]),
+    0
+) * 100
+// Format: 0.00
+
+Cancellation Rate | % =
+DIVIDE(
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Cancelled")),
+    [Total Shipments | Shipments],
+    0
+) * 100
+// Format: 0.00
+
+Return Rate | % =
+DIVIDE(
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[status] = "Returned")),
+    [Total Shipments | Shipments],
+    0
+) * 100
+// Format: 0.00
+
+Inbound vs Outbound Ratio | Ratio =
+VAR _Inbound =
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[shipment_type] = "Inbound"))
+VAR _Outbound =
+    COUNTROWS(FILTER(fact_shipment, fact_shipment[shipment_type] = "Outbound"))
+RETURN
+    DIVIDE(_Inbound, _Outbound, 0)
+// Format: 0.00
+
+// === TIME INTELLIGENCE ===
+
+Shipments YTD | Shipments =
+CALCULATE(
+    [Total Shipments | Shipments],
+    DATESYTD(dim_date[date_key])
+)
+// Format: #,##0
+
+Shipping Cost YTD | USD =
+CALCULATE(
+    [Total Shipping Cost | USD],
+    DATESYTD(dim_date[date_key])
+)
+// Format: $#,##0.00

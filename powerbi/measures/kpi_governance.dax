@@ -1,0 +1,157 @@
+// =============================================================================
+// File    : kpi_governance.dax
+// Purpose : Disconnected KPI catalog and selector measures for the governance
+//           scorecard. Create KPI Catalog as a calculated table; create the
+//           remaining definitions as measures on _Measures.
+// Naming convention: KPI Name | Unit
+// =============================================================================
+
+KPI Catalog =
+DATATABLE(
+    "KPI", STRING,
+    "Domain", STRING,
+    "Unit", STRING,
+    "Target", DOUBLE,
+    "Direction", STRING,
+    "Definition", STRING,
+    "Sort Order", INTEGER,
+    {
+        { "Total Inventory Value (Cost)", "Inventory", "USD", 15000000.0, "Higher", "Latest inventory snapshot valued at unit cost.", 101 },
+        { "Total Inventory Value (Retail)", "Inventory", "USD", BLANK(), "Monitor", "Inventory on hand valued at retail price.", 102 },
+        { "Total Quantity On Hand", "Inventory", "Units", BLANK(), "Monitor", "Total physical quantity currently held.", 103 },
+        { "Total Quantity Available", "Inventory", "Units", BLANK(), "Monitor", "On-hand quantity available after reservations.", 104 },
+        { "Inventory Utilization", "Inventory", "%", 85.0, "Higher", "Share of on-hand inventory currently reserved or allocated.", 105 },
+        { "Stock Out Rate", "Inventory", "%", 3.0, "Lower", "Share of inventory records classified as Out of Stock.", 106 },
+        { "Items Below Reorder Point", "Inventory", "Items", 50.0, "Lower", "Inventory records flagged for replenishment.", 107 },
+        { "Inventory Accuracy", "Inventory", "%", 99.0, "Higher", "Share of records where on hand equals reserved plus available.", 108 },
+        { "Days of Supply", "Inventory", "Days", 30.0, "Higher", "On-hand inventory divided by average daily inventory quantity.", 109 },
+        { "Expiring Items (30 Days)", "Inventory", "Items", 0.0, "Lower", "Inventory records expiring within 30 days.", 110 },
+        { "Inventory Value MoM Change", "Inventory", "%", BLANK(), "Monitor", "Month-over-month percentage change in inventory value at cost.", 111 },
+
+        { "Total Shipments", "Shipment", "Shipments", BLANK(), "Monitor", "Count of shipment fact rows.", 201 },
+        { "On-Time Delivery Rate", "Shipment", "%", 95.0, "Higher", "On-time shipments divided by delivered shipments.", 202 },
+        { "Late Shipment Count", "Shipment", "Shipments", 0.0, "Lower", "Count of shipments delivered after the expected date.", 203 },
+        { "Average Transit Days", "Shipment", "Days", 5.0, "Lower", "Average actual transit duration for delivered shipments.", 204 },
+        { "Total Shipping Cost", "Shipment", "USD", BLANK(), "Monitor", "Total shipment cost in the current filter context.", 205 },
+        { "Cost Per Shipment", "Shipment", "USD/Shipment", 25.0, "Lower", "Total shipping cost divided by shipment count.", 206 },
+        { "Shipment Fill Rate", "Shipment", "%", 98.0, "Higher", "Shipped quantity divided by expected item quantity.", 207 },
+        { "Cancellation Rate", "Shipment", "%", 2.0, "Lower", "Cancelled shipments divided by total shipments.", 208 },
+        { "Return Rate", "Shipment", "%", 2.0, "Lower", "Returned shipments divided by total shipments.", 209 },
+        { "Inbound vs Outbound Ratio", "Shipment", "Ratio", 1.0, "Monitor", "Inbound shipment count divided by outbound shipment count.", 210 },
+        { "Shipments YTD", "Shipment", "Shipments", BLANK(), "Monitor", "Calendar year-to-date shipment count.", 211 },
+        { "Shipping Cost YTD", "Shipment", "USD", BLANK(), "Monitor", "Calendar year-to-date shipping cost.", 212 },
+
+        { "Total Labor Hours", "Labor", "Hours", BLANK(), "Monitor", "Total recorded labor hours.", 301 },
+        { "Total Labor Cost", "Labor", "USD", BLANK(), "Monitor", "Total labor cost in the current filter context.", 302 },
+        { "Total Units Processed", "Labor", "Units", BLANK(), "Monitor", "Total units completed by labor activities.", 303 },
+        { "Average Units Per Hour", "Labor", "Units/Hour", 80.0, "Higher", "Processed units divided by labor hours.", 304 },
+        { "Labor Efficiency Index", "Labor", "%", 100.0, "Higher", "Average employee productivity relative to the 75 UPH benchmark.", 305 },
+        { "Error Rate", "Labor", "%", 2.0, "Lower", "Recorded labor errors divided by units processed.", 306 },
+        { "Cost Per Unit Processed", "Labor", "USD/Unit", 0.5, "Lower", "Total labor cost divided by units processed.", 307 },
+        { "Headcount (Active)", "Labor", "Employees", BLANK(), "Monitor", "Distinct employees represented in filtered labor activity.", 308 },
+        { "Average Hours Per Employee", "Labor", "Hours/Employee", 8.0, "Lower", "Labor hours divided by active employee count.", 309 },
+        { "Overtime Indicator", "Labor", "Employee-Days", 0.0, "Lower", "Employee-date combinations with more than eight labor hours.", 310 },
+        { "High Performers Count", "Labor", "Labor Records", BLANK(), "Monitor", "Labor records classified in the High productivity tier.", 311 },
+        { "Labor Cost MTD", "Labor", "USD", BLANK(), "Monitor", "Calendar month-to-date labor cost.", 312 },
+        { "Labor Cost QTD", "Labor", "USD", BLANK(), "Monitor", "Calendar quarter-to-date labor cost.", 313 },
+        { "Labor Cost YTD", "Labor", "USD", BLANK(), "Monitor", "Calendar year-to-date labor cost.", 314 },
+        { "Units Processed YTD", "Labor", "Units", BLANK(), "Monitor", "Calendar year-to-date processed units.", 315 }
+    }
+)
+
+KPI Actual | Value =
+SWITCH(
+    SELECTEDVALUE('KPI Catalog'[KPI]),
+    "Total Inventory Value (Cost)", [Total Inventory Value (Cost) | USD],
+    "Total Inventory Value (Retail)", [Total Inventory Value (Retail) | USD],
+    "Total Quantity On Hand", [Total Quantity On Hand | Units],
+    "Total Quantity Available", [Total Quantity Available | Units],
+    "Inventory Utilization", [Inventory Utilization | %],
+    "Stock Out Rate", [Stock Out Rate | %],
+    "Items Below Reorder Point", [Items Below Reorder Point | Items],
+    "Inventory Accuracy", [Inventory Accuracy | %],
+    "Days of Supply", [Days of Supply | Days],
+    "Expiring Items (30 Days)", [Expiring Items (30 Days) | Items],
+    "Inventory Value MoM Change", [Inventory Value MoM Change | %],
+    "Total Shipments", [Total Shipments | Shipments],
+    "On-Time Delivery Rate", [On-Time Delivery Rate | %],
+    "Late Shipment Count", [Late Shipment Count | Shipments],
+    "Average Transit Days", [Average Transit Days | Days],
+    "Total Shipping Cost", [Total Shipping Cost | USD],
+    "Cost Per Shipment", [Cost Per Shipment | USD/Shipment],
+    "Shipment Fill Rate", [Shipment Fill Rate | %],
+    "Cancellation Rate", [Cancellation Rate | %],
+    "Return Rate", [Return Rate | %],
+    "Inbound vs Outbound Ratio", [Inbound vs Outbound Ratio | Ratio],
+    "Shipments YTD", [Shipments YTD | Shipments],
+    "Shipping Cost YTD", [Shipping Cost YTD | USD],
+    "Total Labor Hours", [Total Labor Hours | Hours],
+    "Total Labor Cost", [Total Labor Cost | USD],
+    "Total Units Processed", [Total Units Processed | Units],
+    "Average Units Per Hour", [Average Units Per Hour | Units/Hour],
+    "Labor Efficiency Index", [Labor Efficiency Index | %],
+    "Error Rate", [Error Rate | %],
+    "Cost Per Unit Processed", [Cost Per Unit Processed | USD/Unit],
+    "Headcount (Active)", [Headcount (Active) | Employees],
+    "Average Hours Per Employee", [Average Hours Per Employee | Hours/Employee],
+    "Overtime Indicator", [Overtime Indicator | Employee-Days],
+    "High Performers Count", [High Performers Count | Labor Records],
+    "Labor Cost MTD", [Labor Cost MTD | USD],
+    "Labor Cost QTD", [Labor Cost QTD | USD],
+    "Labor Cost YTD", [Labor Cost YTD | USD],
+    "Units Processed YTD", [Units Processed YTD | Units]
+)
+
+KPI Target | Value =
+SELECTEDVALUE('KPI Catalog'[Target])
+
+KPI Variance to Target | Value =
+VAR _Actual = [KPI Actual | Value]
+VAR _Target = [KPI Target | Value]
+RETURN
+    IF(NOT ISBLANK(_Target), _Actual - _Target)
+
+KPI Status | RAG =
+VAR _Actual = [KPI Actual | Value]
+VAR _Target = [KPI Target | Value]
+VAR _Direction = SELECTEDVALUE('KPI Catalog'[Direction])
+RETURN
+    SWITCH(
+        TRUE(),
+        _Direction = "Monitor" || ISBLANK(_Target) || ISBLANK(_Actual), "Gray",
+        _Direction = "Higher" && _Actual >= _Target, "Green",
+        _Direction = "Higher" && _Actual >= _Target * 0.9, "Yellow",
+        _Direction = "Lower" && _Actual <= _Target, "Green",
+        _Direction = "Lower" && _Target > 0 && _Actual <= _Target * 1.5, "Yellow",
+        "Red"
+    )
+
+KPI Status Color | Hex =
+SWITCH(
+    [KPI Status | RAG],
+    "Green", "#38A169",
+    "Yellow", "#D69E2E",
+    "Red", "#E53E3E",
+    "#718096"
+)
+
+KPI Definition | Text =
+SELECTEDVALUE('KPI Catalog'[Definition])
+
+Employee Performance Rank | Rank =
+RANKX(
+    ALLSELECTED(dim_employee[employee_id]),
+    [Average Units Per Hour | Units/Hour],
+    ,
+    DESC,
+    DENSE
+)
+
+Employee Performance Bottom Rank | Rank =
+RANKX(
+    ALLSELECTED(dim_employee[employee_id]),
+    [Average Units Per Hour | Units/Hour],
+    ,
+    ASC,
+    DENSE
+)

@@ -1,0 +1,15 @@
+// =============================================================================
+// File    : field_parameters.dax
+// Purpose : Field parameter used by the Shipment Performance trend toggle.
+// Setup   : Create this as a calculated table, not as a measure. Power BI will
+//           automatically create the companion slicer when added through
+//           Modeling > New parameter > Fields.
+// =============================================================================
+
+Shipment Trend Granularity =
+{
+    ("Daily", NAMEOF(dim_date[date_key]), 0),
+    ("Weekly", NAMEOF(dim_date[week_of_year]), 1),
+    ("Monthly", NAMEOF(dim_date[year_month]), 2)
+}
+

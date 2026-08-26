@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "storageMode": "Import",
+  "settings": {
+    "autoDateTime": false,
+    "discourageImplicitMeasures": true,
+    "relationshipCrossFilterDirection": "Single",
+    "assumeReferentialIntegrity": false,
+    "hideTechnicalColumns": true,
+    "enableAggregationTables": true,
+    "queryReduction": {
+      "slicerApplyButton": true,
+      "filterApplyButton": true
+    }
+  },
+  "removeFromReportModel": {
+    "fact_inventory": ["inventory_fact_key", "warehouse_id", "product_id", "warehouse_name", "category", "sku"],
+    "fact_shipment": ["shipment_fact_key", "warehouse_id", "transit_efficiency_ratio", "total_line_value"],
+    "fact_labor": ["labor_fact_key", "warehouse_id", "employee_name", "department", "shift", "hourly_rate", "error_rate_pct"],
+    "dim_warehouse": ["address"],
+    "dim_employee": ["email"],
+    "security_user_warehouse": ["granted_at", "granted_by"]
+  },
+  "hideButRetain": {
+    "fact_inventory": ["warehouse_key", "product_key", "date_key"],
+    "fact_shipment": ["warehouse_key", "date_key"],
+    "fact_labor": ["warehouse_key", "employee_key", "date_key"],
+    "dim_date": ["day_of_year", "fiscal_month"],
+    "dim_warehouse": ["warehouse_key"],
+    "dim_product": ["product_key"],
+    "dim_employee": ["employee_key"],
+    "security_user_warehouse": ["user_email", "warehouse_id", "is_active"]
+  },
+  "aggregations": [
+    {
+      "table": "agg_inventory_monthly",
+      "detailTable": "fact_inventory",
+      "storageMode": "Import",
+      "precedence": 30,
+      "grain": ["month_start", "warehouse_key", "product_key"],
+      "mappings": {
+        "inventory_records": "Count rows",
+        "quantity_on_hand": "Sum(quantity_on_hand)",
+        "quantity_reserved": "Sum(quantity_reserved)",
+        "quantity_available": "Sum(quantity_available)",
+        "inventory_value_at_cost": "Sum(inventory_value_at_cost)",
+        "inventory_value_at_retail": "Sum(inventory_value_at_retail)"
+      }
+    },
+    {
+      "table": "agg_shipment_monthly",
+      "detailTable": "fact_shipment",
+      "storageMode": "Import",
+      "precedence": 20,
+      "grain": ["month_start", "warehouse_key", "shipment_type", "carrier"],
+      "mappings": {
+        "shipment_count": "Count rows",
+        "total_items": "Sum(total_items)",
+        "total_quantity": "Sum(total_quantity)",
+        "shipping_cost": "Sum(shipping_cost)"
+      }
+    },
+    {
+      "table": "agg_labor_monthly",
+      "detailTable": "fact_labor",
+      "storageMode": "Import",
+      "precedence": 10,
+      "grain": ["month_start", "warehouse_key", "employee_key", "activity_type"],
+      "mappings": {
+        "labor_records": "Count rows",
+        "total_hours": "Sum(total_hours)",
+        "total_units": "Sum(total_units)",
+        "total_orders": "Sum(total_orders)",
+        "total_errors": "Sum(total_errors)",
+        "labor_cost": "Sum(labor_cost)"
+      }
+    }
+  ]
+}

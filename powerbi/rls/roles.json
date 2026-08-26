@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "securityTable": "security_user_warehouse",
+  "identityFunction": "USERPRINCIPALNAME",
+  "defaultBehavior": "deny",
+  "roles": [
+    {
+      "name": "WarehouseAccess",
+      "filterTable": "dim_warehouse",
+      "expressionFile": "warehouse_rls.dax",
+      "restricted": true,
+      "serviceMembers": "Assign warehouse viewers through Microsoft Entra security groups"
+    },
+    {
+      "name": "WarehouseAdministrator",
+      "filterTable": "dim_warehouse",
+      "expression": "TRUE()",
+      "restricted": false,
+      "serviceMembers": "Assign only explicitly authorized administrators and executives"
+    }
+  ]
+}

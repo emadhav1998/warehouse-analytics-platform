@@ -1,0 +1,9 @@
+packages:
+  # Core utility macros: surrogate keys, date spines, pivot/unpivot, etc.
+  - package: dbt-labs/dbt_utils
+    version: [">=1.0.0", "<2.0.0"]
+
+  # Advanced data quality tests beyond dbt's built-in generic tests
+  # Note: calogica/dbt_expectations is deprecated; using metaplane fork
+  - package: metaplane/dbt_expectations
+    version: [">=0.10.0", "<1.0.0"]

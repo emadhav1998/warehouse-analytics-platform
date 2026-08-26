@@ -1,0 +1,96 @@
+// =============================================================================
+// File    : dashboard_measures.dax
+// Purpose : Supporting measures for dashboard scorecards, legends, targets,
+//           conditional formatting, and month-over-month indicators.
+// Home table: _Measures
+// Naming convention: KPI Name | Unit
+// =============================================================================
+
+Inventory Records | Records =
+COUNTROWS(fact_inventory)
+// Format: #,##0
+
+Days of Supply Target | Days =
+30
+// Format: #,##0
+
+Inbound Shipments | Shipments =
+CALCULATE(
+    [Total Shipments | Shipments],
+    fact_shipment[shipment_type] = "Inbound"
+)
+// Format: #,##0
+
+Outbound Shipments | Shipments =
+CALCULATE(
+    [Total Shipments | Shipments],
+    fact_shipment[shipment_type] = "Outbound"
+)
+// Format: #,##0
+
+On-Time Delivery Rate MoM Change | pp =
+VAR _CurrentRate =
+    [On-Time Delivery Rate | %]
+VAR _PriorRate =
+    CALCULATE(
+        [On-Time Delivery Rate | %],
+        DATEADD(dim_date[date_key], -1, MONTH)
+    )
+RETURN
+    _CurrentRate - _PriorRate
+// Format: +0.00;-0.00;0.00
+
+Units Per Hour MoM Change | % =
+VAR _CurrentUPH =
+    [Average Units Per Hour | Units/Hour]
+VAR _PriorUPH =
+    CALCULATE(
+        [Average Units Per Hour | Units/Hour],
+        DATEADD(dim_date[date_key], -1, MONTH)
+    )
+RETURN
+    DIVIDE(_CurrentUPH - _PriorUPH, _PriorUPH, 0) * 100
+// Format: +0.00;-0.00;0.00
+
+Labor Cost MoM Change | % =
+VAR _CurrentCost =
+    [Total Labor Cost | USD]
+VAR _PriorCost =
+    CALCULATE(
+        [Total Labor Cost | USD],
+        DATEADD(dim_date[date_key], -1, MONTH)
+    )
+RETURN
+    DIVIDE(_CurrentCost - _PriorCost, _PriorCost, 0) * 100
+// Format: +0.00;-0.00;0.00
+
+Stock Out Rate MoM Change | pp =
+VAR _CurrentRate =
+    [Stock Out Rate | %]
+VAR _PriorRate =
+    CALCULATE(
+        [Stock Out Rate | %],
+        DATEADD(dim_date[date_key], -1, MONTH)
+    )
+RETURN
+    _CurrentRate - _PriorRate
+// Format: +0.00;-0.00;0.00
+
+Stock Status Color | Hex =
+SWITCH(
+    SELECTEDVALUE(fact_inventory[stock_status]),
+    "Out of Stock", "#E53E3E",
+    "Low Stock", "#D69E2E",
+    "In Stock", "#38A169",
+    "#718096"
+)
+
+Delivery Performance Color | Hex =
+SWITCH(
+    SELECTEDVALUE(fact_shipment[delivery_performance]),
+    "Late", "#E53E3E",
+    "Cancelled", "#718096",
+    "On Time", "#38A169",
+    "#D69E2E"
+)
+

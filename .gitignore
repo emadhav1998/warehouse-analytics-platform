@@ -8,6 +8,7 @@ __pycache__/
 *.pyc
 .env
 venv/
+.venv/
 
 # Power BI
 *.pbix.tmp
@@ -25,3 +26,6 @@ Thumbs.db
 target/
 dbt_packages/
 logs/
+
+# Generated validation reports
+scripts/reports/*.json

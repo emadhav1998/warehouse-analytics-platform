@@ -1,0 +1,54 @@
+// =============================================================================
+// File    : kpi_measures.dax
+// Purpose : Master KPI measures table for the Warehouse Analytics report.
+//           All measures belong to the hidden _Measures table.
+//
+// Naming convention : "KPI Name | Unit"
+// Format strings    : defined per measure via Format pane
+// =============================================================================
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVENTORY MEASURES  (see inventory_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Inventory measures are defined in inventory_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHIPMENT MEASURES  (see shipment_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Shipment measures are defined in shipment_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LABOR MEASURES  (see labor_measures.dax for full set)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Labor measures are defined in labor_measures.dax.
+// Keep a single definition for each measure to prevent duplicate model objects.
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STAR SCHEMA RELATIONSHIP MAP (reference — not runnable DAX)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// dim_date.date_key      (1) → (*) fact_inventory.date_key
+// dim_date.date_key      (1) → (*) fact_shipment.date_key
+// dim_date.date_key      (1) → (*) fact_labor.date_key
+//
+// dim_warehouse.warehouse_key (1) → (*) fact_inventory.warehouse_key
+// dim_warehouse.warehouse_key (1) → (*) fact_shipment.warehouse_key
+// dim_warehouse.warehouse_key (1) → (*) fact_labor.warehouse_key
+//
+// dim_product.product_key     (1) → (*) fact_inventory.product_key
+// dim_employee.employee_key   (1) → (*) fact_labor.employee_key
+//
+// All relationships: single-direction, cross-filter = Single
+//
+// Date Hierarchy (on dim_date):
+//   Year → Quarter Name → Month Name → Date Key
+//   Sort: month_name BY month_number, quarter_name BY quarter_number

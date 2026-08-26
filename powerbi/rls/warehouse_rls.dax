@@ -1,0 +1,35 @@
+// =============================================================================
+// Dynamic warehouse row-level security roles
+// =============================================================================
+
+// Role: WarehouseAccess
+// Apply this expression to dim_warehouse.
+// security_user_warehouse is intentionally disconnected from the model.
+// Access is denied when the signed-in identity has no active mapping.
+
+VAR _CurrentUser = LOWER(USERPRINCIPALNAME())
+VAR _CurrentWarehouse = dim_warehouse[warehouse_id]
+RETURN
+    COUNTROWS(
+        FILTER(
+            security_user_warehouse,
+            LOWER(security_user_warehouse[user_email]) = _CurrentUser
+                && security_user_warehouse[warehouse_id] = _CurrentWarehouse
+                && security_user_warehouse[is_active] = TRUE()
+        )
+    ) > 0
+
+
+// Role: WarehouseAdministrator
+// Apply this expression to dim_warehouse. Assign only trusted administrators
+// and executives who are authorized to see every warehouse.
+
+TRUE()
+
+
+// Important Power BI Service behavior:
+// - Assign ordinary viewers only to WarehouseAccess.
+// - Do not assign the same viewer to WarehouseAdministrator because roles are
+//   combined with OR semantics and the unrestricted role would win.
+// - Workspace Admin, Member, and Contributor permissions bypass RLS. Consumers
+//   who must be restricted should have Viewer access through the semantic model.

@@ -1,0 +1,89 @@
+version: 2
+
+models:
+
+  - name: int_inventory_daily_snapshot
+    description: >
+      Daily inventory snapshot enriched with product and warehouse dimensions.
+      Adds inventory value calculations, reorder flags, and expiry monitoring.
+      Materialized as ephemeral — used as a CTE in downstream mart models.
+    columns:
+      - name: snapshot_date
+        description: "Date of the inventory count"
+        tests: [not_null]
+      - name: warehouse_id
+        tests: [not_null]
+      - name: product_id
+        tests: [not_null]
+      - name: quantity_on_hand
+        tests: [not_null]
+      - name: stock_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Out of Stock', 'Fully Reserved', 'Low Stock', 'In Stock']
+      - name: needs_reorder
+        description: "1 if quantity_available <= reorder_point, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: expiring_within_30_days
+        description: "1 if expiry_date is within 30 days of snapshot_date, else 0"
+        tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+      - name: inventory_value_at_cost
+        description: "quantity_on_hand × unit_cost"
+      - name: inventory_value_at_retail
+        description: "quantity_on_hand × unit_price"
+
+  - name: int_shipment_summary
+    description: >
+      Daily shipment aggregates per warehouse and shipment type.
+      Calculates on-time delivery rate, transit time, and shipping cost metrics.
+      Materialized as ephemeral — used as a CTE in downstream mart models.
+    columns:
+      - name: ship_date
+        description: "Date shipments were dispatched"
+        tests: [not_null]
+      - name: warehouse_id
+        tests: [not_null]
+      - name: shipment_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Inbound', 'Outbound']
+      - name: total_shipments
+        description: "Total number of shipments on this date for this warehouse/type"
+        tests: [not_null]
+      - name: on_time_delivery_pct
+        description: "Percentage of delivered shipments that arrived on time (0–100)"
+      - name: avg_transit_days
+        description: "Average actual transit days (only for Delivered shipments)"
+
+  - name: int_labor_productivity
+    description: >
+      Daily labor productivity per employee per activity type.
+      Calculates total hours, units processed, error rate, and labor cost.
+      Materialized as ephemeral — used as a CTE in downstream mart models.
+    columns:
+      - name: activity_date
+        description: "Date the labor activities occurred"
+        tests: [not_null]
+      - name: employee_id
+        tests: [not_null]
+      - name: activity_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Picking', 'Packing', 'Receiving', 'Putaway', 'Loading', 'Cycle Count']
+      - name: total_hours
+        description: "Total hours worked across all activities in this grouping"
+      - name: avg_units_per_hour
+        description: "Derived: total_units / total_hours"
+      - name: error_rate_pct
+        description: "Derived: (total_errors / total_units) × 100"
+      - name: labor_cost
+        description: "Derived: total_hours × hourly_rate"
